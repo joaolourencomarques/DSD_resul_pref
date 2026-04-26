@@ -51,7 +51,7 @@
   }
   .form-card{padding:26px;margin-bottom:24px}
   .form-grid{display:grid;gap:22px 16px}
-  .filters-grid{display:grid;grid-template-columns:repeat(5,minmax(180px,1fr));gap:14px}
+  .filters-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
   label{display:block;color:var(--muted);font-size:1rem;margin-bottom:8px}
   input,select,button{font:inherit}
   input,select{
@@ -162,6 +162,7 @@
       </div>
       <div class="filters-grid">
         <div><label for="filter-sem">Filtrar semestre</label><select id="filter-sem"><option value="">Todos os semestres</option></select></div>
+        <div><label for="filter-ciclo">Filtrar ciclo</label><select id="filter-ciclo"><option value="">Todos os ciclos</option></select></div>
         <div><label for="filter-curso">Filtrar curso</label><select id="filter-curso"><option value="">Todos os cursos</option></select></div>
         <div><label for="filter-area">Filtrar área</label><select id="filter-area"><option value="">Todas as áreas</option></select></div>
         <div><label for="filter-docentes">Filtrar docentes</label><select id="filter-docentes"><option value="">Todos os docentes</option><option value="integral">Docentes a tempo integral</option><option value="outros">Outros docentes</option></select></div>
@@ -487,6 +488,7 @@ function fillSelect(id, vals, label){
 }
 function initializeControls(){
   fillSelect("filter-sem", DATA.semestres, "Todos os semestres");
+  fillSelect("filter-ciclo", DATA.ciclos || [], "Todos os ciclos");
   fillSelect("filter-curso", DATA.cursos, "Todos os cursos");
   fillSelect("filter-area", DATA.areas, "Todas as áreas");
   populateFocusSelects();
@@ -506,12 +508,14 @@ function ucMeta(i){
 function filteredUCs(){
   if(!DATA) return [];
   const sem = document.getElementById("filter-sem").value;
+  const ciclo = document.getElementById("filter-ciclo").value;
   const curso = document.getElementById("filter-curso").value;
   const area = document.getElementById("filter-area").value;
   const q = normText(document.getElementById("search-uc").value);
   return DATA.ucs.map((_,i)=>i).filter(i => {
     const m = ucMeta(i);
     if(sem && String(m.sem) !== sem) return false;
+    if(ciclo && m.ciclo !== ciclo) return false;
     if(curso && m.curso !== curso) return false;
     if(area && m.area !== area) return false;
     if(q && !normText(`${m.id} ${m.nome} ${m.curso} ${m.area} ${m.tipo} ${m.ciclo} ${m.uo}`).includes(q)) return false;
@@ -972,11 +976,11 @@ function renderAll(){
   renderHeatmap();
 }
 function clearFilters(){
-  ["filter-sem","filter-curso","filter-area","filter-docentes","search-uc"].forEach(id => {document.getElementById(id).value = "";});
+  ["filter-sem","filter-ciclo","filter-curso","filter-area","filter-docentes","search-uc"].forEach(id => {document.getElementById(id).value = "";});
   renderCurrent();
 }
 function bindEvents(){
-  ["filter-sem","filter-curso","filter-area","filter-docentes","search-uc"].forEach(id => document.getElementById(id).addEventListener("input", renderCurrent));
+  ["filter-sem","filter-ciclo","filter-curso","filter-area","filter-docentes","search-uc"].forEach(id => document.getElementById(id).addEventListener("input", renderCurrent));
   document.getElementById("clear-filters").addEventListener("click", clearFilters);
   ["heat-min","uc-rank-sort","uc-rank-dir","doc-top-n","uc-focus","uc-aff-method","uc-affinity-topn","doc-focus","doc-aff-method","doc-affinity-topn","net-type","net-method","net-limit","net-thresh","net-spacing","net-label-mode","puc-method","puc-limit","puc-thresh","pdoc-method","pdoc-limit","pdoc-thresh"].forEach(id => document.getElementById(id).addEventListener("input", renderCurrent));
   document.querySelectorAll(".tab").forEach(btn => btn.addEventListener("click", () => {
