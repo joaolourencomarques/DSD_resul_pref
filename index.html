@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Distribuição de Serviço Docente do DCSPT</title>
+<title>Serviço Docente do DCSPT · offline</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
   @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
@@ -51,7 +51,7 @@
   }
   .form-card{padding:26px;margin-bottom:24px}
   .form-grid{display:grid;gap:22px 16px}
-  .filters-grid{display:grid;grid-template-columns:repeat(5,minmax(180px,1fr));gap:14px}
+  .filters-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
   label{display:block;color:var(--muted);font-size:1rem;margin-bottom:8px}
   input,select,button{font:inherit}
   input,select{
@@ -78,17 +78,66 @@
   .tab{border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:999px;padding:10px 14px;cursor:pointer;font-weight:500;transition:all .16s ease}
   .tab:hover{color:var(--text);border-color:#596578}
   .tab.active{background:#e5eefb;color:#0b1220;border-color:#e5eefb}
+  .tab.method-tab{
+    margin-left:auto;
+    background:transparent;
+    border-style:dashed;
+    color:var(--white-blue);
+    position:relative;
+    padding-left:34px;
+  }
+  .tab.method-tab::before{
+    content:"i";
+    position:absolute;
+    left:13px;
+    top:50%;
+    transform:translateY(-50%);
+    width:15px;
+    height:15px;
+    border:1px solid currentColor;
+    border-radius:50%;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:.68rem;
+    line-height:1;
+    opacity:.9;
+  }
+  .tab.method-tab:hover{background:#101720;border-style:solid}
+  .tab.method-tab.active{background:#30275f;color:#f4ecff;border-color:#8b7cf6}
+  .method-card{
+    background:linear-gradient(180deg,#171421,#11161d);
+    border-color:#5b4a98;
+    box-shadow:0 0 0 1px rgba(139,124,246,.08) inset;
+  }
+  .method-eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    width:max-content;
+    color:#d8ccff;
+    background:rgba(139,124,246,.12);
+    border:1px solid rgba(139,124,246,.35);
+    border-radius:999px;
+    padding:7px 11px;
+    font-size:.82rem;
+    margin-bottom:14px;
+  }
+  @media(max-width:900px){.tab.method-tab{margin-left:0}}
   .panel{display:none}
   .panel.active{display:block}
   .panel-card{padding:18px;margin-bottom:22px}
-  .panel-head{display:flex;gap:12px;align-items:end;justify-content:space-between;flex-wrap:wrap;margin-bottom:16px}
+  .panel-head{display:grid;gap:10px;margin-bottom:16px}
   .panel-title{font-size:1.35rem;letter-spacing:-.02em;font-weight:500}
   .panel-sub{color:var(--muted);font-size:.98rem;margin-top:5px;line-height:1.35}
   .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .control-sm{min-width:180px}
-  .control-sm select,.control-sm input{min-height:44px;padding:9px 12px;border-radius:12px;font-size:.94rem}
-  .control-inline{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.93rem}
+  .control-sm{min-width:180px;flex:0 0 240px}
+  .control-sm select,.control-sm input{width:100%;min-height:44px;padding:9px 12px;border-radius:12px;font-size:.94rem}
+  .control-inline{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.93rem;white-space:nowrap}
   .control-inline input[type=range]{width:140px;min-height:0;padding:0;accent-color:#dbeafe}
+  .network-controls{flex-wrap:nowrap;overflow-x:auto}
+  .network-controls .control-sm{flex:0 0 180px}
+  .network-controls .control-inline{flex:0 0 auto}
   .range-val{font-weight:400;color:var(--white-blue);min-width:42px;text-align:right}
 
   .table-wrap{overflow:auto;max-height:72vh;border:1px solid var(--border);border-radius:18px;background:var(--surface)}
@@ -120,7 +169,7 @@
 
   .affinity-controls{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
   .affinity-summary{display:grid;gap:16px}
-  .affinity-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+  .affinity-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;align-items:start}
   .affinity-card{background:linear-gradient(180deg,var(--surface),#141920);border:1px solid var(--border);border-radius:18px;padding:16px;min-width:0}
   .affinity-card h3{font-size:1rem;font-weight:400;margin-bottom:10px;color:#f6f8fb;letter-spacing:-.01em}
   .selected-subject{display:grid;gap:8px;background:#10161f;border:1px solid var(--border);border-radius:16px;padding:14px;color:var(--muted)}
@@ -129,9 +178,10 @@
   .corr-pill{display:inline-flex;align-items:center;justify-content:center;min-width:58px;border-radius:999px;padding:5px 9px;color:#07110b;font-variant-numeric:tabular-nums;font-weight:400}
   .mini-note{color:var(--muted);font-size:.9rem;line-height:1.45}
 
-  .network-layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;align-items:start}
-  canvas{width:100%;height:64vh;display:block;background:#11161d;border:1px solid var(--border);border-radius:18px}
-  .node-list{max-height:64vh;overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:12px}
+  .network-layout{display:grid;grid-template-columns:1fr;gap:16px;align-items:start}
+  canvas{width:100%;height:64vh;display:block;background:#11161d;border:1px solid var(--border);border-radius:18px;cursor:grab}
+  .node-list{display:none}
+  .network-hint{font-size:.92rem;color:var(--muted);margin:8px 0 0}
   .node-list h3{font-size:.95rem;margin:4px 4px 10px;color:#fff;font-weight:400}
   .node-item{display:flex;gap:8px;padding:9px 6px;border-top:1px solid var(--border-soft);font-size:.86rem;line-height:1.25}
   .node-item:first-of-type{border-top:0}.node-key{font-weight:400;color:#dbeafe;min-width:44px}
@@ -143,6 +193,39 @@
   #tooltip .tip-title{display:block;margin-bottom:5px;color:#fff;font-weight:400}
   #tooltip .soft{color:var(--muted)}
 
+  /* ── Melhoria 4: badge de filtros activos ── */
+  .filter-active-badge{
+    display:inline-flex;align-items:center;gap:5px;
+    background:rgba(219,234,254,.12);border:1px solid rgba(219,234,254,.3);
+    border-radius:999px;padding:2px 9px 2px 7px;font-size:.78rem;color:#dbeafe;
+    vertical-align:middle;margin-left:8px;white-space:nowrap;
+  }
+  .filter-active-badge .badge-x{cursor:pointer;opacity:.7;font-size:.9rem;line-height:1;margin-left:2px}
+  .filter-active-badge .badge-x:hover{opacity:1}
+  #visible-count.has-filters{color:#dbeafe;font-weight:500}
+
+  /* ── Melhoria 10: tooltips inline nas Medidas ── */
+  .method-wrap{display:flex;align-items:center;gap:6px}
+  .method-help{
+    flex-shrink:0;width:17px;height:17px;border-radius:50%;
+    border:1px solid var(--border);background:var(--surface-3);
+    color:var(--muted-2);font-size:.68rem;line-height:17px;text-align:center;
+    cursor:default;user-select:none;transition:border-color .14s,color .14s;
+  }
+  .method-help:hover{border-color:#6d7a8d;color:var(--text)}
+  .has-tip{cursor:help}
+  .control-inline.has-tip input,.control-inline.has-tip select{cursor:help}
+
+
+  /* ── Melhoria 6: navegação cruzada nos pares ── */
+  .jump-btn{
+    display:inline-flex;align-items:center;gap:4px;
+    border:1px solid var(--border);background:#10161f;color:#dbeafe;
+    border-radius:999px;padding:4px 8px;margin-top:7px;margin-right:5px;
+    font-size:.76rem;line-height:1;cursor:pointer;white-space:nowrap;
+  }
+  .jump-btn:hover,.jump-btn:focus{border-color:#6d7a8d;background:#17202b;color:#fff;outline:none}
+
   @media(max-width:1180px){.filters-grid{grid-template-columns:repeat(2,1fr)}.metrics-strip{grid-template-columns:repeat(2,1fr)}.affinity-grid{grid-template-columns:1fr}.network-layout{grid-template-columns:1fr}.node-list{max-height:260px}}
   @media(max-width:900px){body{padding:16px}.filters-grid,.metrics-strip{grid-template-columns:1fr}.tabs{position:static}.hero h1{font-size:2.55rem}.hero p{font-size:1.02rem}.sticky-col{min-width:280px}.form-card{padding:18px}}
 </style>
@@ -151,17 +234,18 @@
 <div class="shell">
   <div id="tooltip"></div>
   <header class="hero">
-    <h1>Distribuição de Serviço Docente do DCSPT</h1>
-    <p>Consulta informal para recolher manifestações de interesse relativamente às unidades curriculares do DCSPT. A escala usada é de 1 a 5: 1 Indisponível, 2 Como último recurso, 3 Indiferente, 4 Com interesse, 5 Primeira escolha.</p>
+    <h1>Serviço Docente do DCSPT</h1>
+    <p>Análise das <strong>Respostas</strong> de preferências de serviço docente</p>
   </header>
 
   <section class="form-card">
     <div class="form-grid">
       <div class="data-row">
-        <div class="data-status" id="data-status">A carregar <span>inputdcspt_All.xlsx</span>...</div>
+        <div class="data-status" id="data-status">Modo offline: selecione o ficheiro Excel <span>inputdcspt_All.xlsx</span>.</div>
       </div>
       <div class="filters-grid">
         <div><label for="filter-sem">Filtrar semestre</label><select id="filter-sem"><option value="">Todos os semestres</option></select></div>
+        <div><label for="filter-ciclo">Filtrar ciclo</label><select id="filter-ciclo"><option value="">Todos os ciclos</option></select></div>
         <div><label for="filter-curso">Filtrar curso</label><select id="filter-curso"><option value="">Todos os cursos</option></select></div>
         <div><label for="filter-area">Filtrar área</label><select id="filter-area"><option value="">Todas as áreas</option></select></div>
         <div><label for="filter-docentes">Filtrar docentes</label><select id="filter-docentes"><option value="">Todos os docentes</option><option value="integral">Docentes a tempo integral</option><option value="outros">Outros docentes</option></select></div>
@@ -176,33 +260,24 @@
   </section>
 
   <nav class="tabs" aria-label="Navegação principal">
-    <button class="tab active" data-tab="heatmap">Respostas</button>
-    <button class="tab" data-tab="ranking-ucs">Ranking UCs</button>
-    <button class="tab" data-tab="doc-ranking">Ranking docentes</button>
-    <button class="tab" data-tab="uc-corr">Afinidades UC</button>
-    <button class="tab" data-tab="doc-corr">Afinidades docentes</button>
-    <button class="tab" data-tab="network">Rede</button>
-    <button class="tab" data-tab="pares-uc">Pares de UCs</button>
-    <button class="tab" data-tab="pares-doc">Pares de Docentes</button>
+    <button class="tab active" data-tab="ranking-ucs">Preferência por UC</button>
+    <button class="tab" data-tab="doc-ranking">Preferência por Docente</button>
+    <button class="tab" data-tab="network">Rede de proximidades</button>
+    <button class="tab" data-tab="pares-uc">Afinidades UC</button>
+    <button class="tab" data-tab="pares-doc">Afinidades docentes</button>
+    <button class="tab" data-tab="uc-corr">Consulta por UC</button>
+    <button class="tab" data-tab="doc-corr">Consulta por Docente</button>
+    <button class="tab method-tab" data-tab="nota-metodologica">Nota metodológica</button>
   </nav>
 
   <main>
-    <section id="heatmap" class="panel active">
+    <section id="ranking-ucs" class="panel active">
       <div class="panel-card">
         <div class="panel-head">
-          <div><h2 class="panel-title">Respostas agregadas</h2><p class="panel-sub">As colunas de docentes e as linhas de UCs são lidas diretamente do Excel carregado.</p></div>
-          <div class="controls"><label class="control-inline">Min. visível <input id="heat-min" type="range" min="1" max="5" value="1" step="1" /><span class="range-val" id="heat-min-val">1</span></label></div>
-        </div>
-        <div class="table-wrap" id="heatmap-container"><div class="empty-state">A carregar dados...</div></div>
-      </div>
-    </section>
-
-    <section id="ranking-ucs" class="panel">
-      <div class="panel-card">
-        <div class="panel-head">
-          <div><h2 class="panel-title">Ranking UCs</h2><p class="panel-sub">Ranking recalculado com os filtros de UCs e de universo de docentes.</p></div>
+          <div><h2 class="panel-title">Preferência por UC</h2><p class="panel-sub">Ranking recalculado com os filtros de UCs e de universo de docentes.</p></div>
           <div class="controls">
-            <div class="control-sm"><label for="uc-rank-sort">Ordenar por</label><select id="uc-rank-sort"><option value="pref">Preferência (4 e 5)</option><option value="first">Primeira escolha (5)</option><option value="avg">Média</option><option value="sum">Soma</option><option value="sd">Desvio / variação</option></select></div>
+            <label class="control-inline">Top N <input id="uc-top-n" type="range" min="5" max="30" value="15" step="1" /><span class="range-val" id="uc-top-n-val">15</span></label>
+            <div class="control-sm"><label for="uc-rank-sort">Ordenar por</label><select id="uc-rank-sort"><option value="first">Primeira escolha (5)</option><option value="pref">Preferência (4 e 5)</option><option value="sum">Soma</option><option value="sd">Desvio / variação</option></select></div>
             <div class="control-sm"><label for="uc-rank-dir">Direção</label><select id="uc-rank-dir"><option value="desc">Descendente</option><option value="asc">Ascendente</option></select></div>
           </div>
         </div>
@@ -213,8 +288,8 @@
     <section id="doc-ranking" class="panel">
       <div class="panel-card">
         <div class="panel-head">
-          <div><h2 class="panel-title">Ranking docentes</h2><p class="panel-sub">Mostra as UCs preferidas por cada docente do universo selecionado.</p></div>
-          <div class="controls"><label class="control-inline">Top N <input id="doc-top-n" type="range" min="3" max="12" value="6" step="1" /><span class="range-val" id="doc-top-n-val">6</span></label></div>
+          <div><h2 class="panel-title">Preferência por Docente</h2><p class="panel-sub">Mostra as UCs preferidas por cada docente do universo selecionado.</p></div>
+          <div class="controls"><label class="control-inline">Top N <input id="doc-top-n" type="range" min="3" max="12" value="6" step="1" /><span class="range-val" id="doc-top-n-val">6</span></label><div class="control-sm"><label for="doc-rank-filter">Ordenar por</label><select id="doc-rank-filter"><option value="five">Primeiras escolhas (5)</option><option value="four-five">Preferências (4 e 5)</option><option value="three">Indiferença (3)</option><option value="two-one">Pouca ou nenhuma disponibilidade (2 e 1)</option></select></div><div class="control-sm"><label for="doc-rank-dir">Direção</label><select id="doc-rank-dir"><option value="desc">Descendente</option><option value="asc">Ascendente</option></select></div></div>
         </div>
         <div class="ranking-grid" id="doc-ranking-container"></div>
       </div>
@@ -223,10 +298,11 @@
     <section id="uc-corr" class="panel">
       <div class="panel-card">
         <div class="panel-head">
-          <div><h2 class="panel-title">Afinidades UC</h2><p class="panel-sub">Afinidades recalculadas a partir das respostas dos docentes atualmente filtrados.</p></div>
+          <div><h2 class="panel-title">Consulta por UC</h2><p class="panel-sub">Afinidades recalculadas a partir das respostas dos docentes atualmente filtrados.</p></div>
           <div class="affinity-controls">
             <div class="control-sm"><label for="uc-focus">Escolher UC</label><select id="uc-focus"></select></div>
-            <div class="control-sm"><label for="uc-aff-method">Medida</label><select id="uc-aff-method"><option value="spearman" selected>Spearman</option><option value="jaccard">Jaccard (≥4)</option><option value="kendall">Kendall τ</option></select></div>
+            <div class="control-sm"><label for="uc-aff-method">Medida</label><div class="method-wrap"><select id="uc-aff-method"><option value="spearman" selected>Afinidade global (Spearman)</option><option value="jaccard">Preferências fortes (Jaccard ≥ 4)</option><option value="kendall">Robustez de ordenação (Kendall)</option></select><span class="method-help" tabindex="0" onmouseenter="tipMethod(event,this.closest('.control-sm').querySelector('select').value)" onmouseleave="hideTip()" onfocus="tipMethod(event,this.closest('.control-sm').querySelector('select').value)" onblur="hideTip()">?</span></div></div>
+            <div class="control-sm"><label for="uc-aff-order">Direção</label><select id="uc-aff-order"><option value="desc">Mais semelhantes</option><option value="asc">Mais diferentes</option></select></div>
             <div class="control-sm"><label for="uc-affinity-topn">Top</label><select id="uc-affinity-topn"><option value="10">10</option><option value="15" selected>15</option><option value="20">20</option><option value="30">30</option></select></div>
           </div>
         </div>
@@ -237,10 +313,11 @@
     <section id="doc-corr" class="panel">
       <div class="panel-card">
         <div class="panel-head">
-          <div><h2 class="panel-title">Afinidades docentes</h2><p class="panel-sub">Afinidades recalculadas com base nas UCs atualmente filtradas.</p></div>
+          <div><h2 class="panel-title">Consulta por Docente</h2><p class="panel-sub">Afinidades recalculadas com base nas UCs atualmente filtradas.</p></div>
           <div class="affinity-controls">
             <div class="control-sm"><label for="doc-focus">Escolher docente</label><select id="doc-focus"></select></div>
-            <div class="control-sm"><label for="doc-aff-method">Medida</label><select id="doc-aff-method"><option value="spearman" selected>Spearman</option><option value="jaccard">Jaccard (≥4)</option><option value="kendall">Kendall τ</option></select></div>
+            <div class="control-sm"><label for="doc-aff-method">Medida</label><div class="method-wrap"><select id="doc-aff-method"><option value="spearman" selected>Afinidade global (Spearman)</option><option value="jaccard">Preferências fortes (Jaccard ≥ 4)</option><option value="kendall">Robustez de ordenação (Kendall)</option></select><span class="method-help" tabindex="0" onmouseenter="tipMethod(event,this.closest('.control-sm').querySelector('select').value)" onmouseleave="hideTip()" onfocus="tipMethod(event,this.closest('.control-sm').querySelector('select').value)" onblur="hideTip()">?</span></div></div>
+            <div class="control-sm"><label for="doc-aff-order">Direção</label><select id="doc-aff-order"><option value="desc">Mais semelhantes</option><option value="asc">Mais diferentes</option></select></div>
             <div class="control-sm"><label for="doc-affinity-topn">Top</label><select id="doc-affinity-topn"><option value="8">8</option><option value="10" selected>10</option><option value="15">15</option><option value="20">20</option></select></div>
           </div>
         </div>
@@ -251,17 +328,18 @@
     <section id="network" class="panel">
       <div class="panel-card">
         <div class="panel-head">
-          <div><h2 class="panel-title">Rede de afinidades</h2><p class="panel-sub">Grafo com força de repulsão, colisão entre nós e etiquetas configuráveis.</p></div>
-          <div class="controls">
+          <div><h2 class="panel-title">Rede de proximidades</h2><p class="panel-sub">Nós mais próximos indicam maior proximidade de preferências (threshold ≥ 4).</p></div>
+          <div class="controls network-controls">
             <div class="control-sm"><label for="net-type">Tipo</label><select id="net-type"><option value="uc">Rede de UCs</option><option value="doc">Rede de docentes</option></select></div>
-            <div class="control-sm"><label for="net-method">Medida</label><select id="net-method"><option value="spearman" selected>Spearman</option><option value="jaccard">Jaccard (≥4)</option><option value="kendall">Kendall τ</option></select></div>
+            <div class="control-sm"><label for="net-method">Medida</label><div class="method-wrap"><select id="net-method"><option value="spearman" selected>Afinidade global (Spearman)</option><option value="jaccard">Preferências fortes (Jaccard ≥ 4)</option><option value="kendall">Robustez de ordenação (Kendall)</option></select><span class="method-help" tabindex="0" onmouseenter="tipMethod(event,this.closest('.control-sm').querySelector('select').value)" onmouseleave="hideTip()" onfocus="tipMethod(event,this.closest('.control-sm').querySelector('select').value)" onblur="hideTip()">?</span></div></div>
             <div class="control-sm"><label for="net-limit">Limite</label><select id="net-limit"><option value="30">30</option><option value="50" selected>50</option><option value="80">80</option></select></div>
-            <label class="control-inline">Threshold <input id="net-thresh" type="range" min="20" max="90" value="55" step="5" /><span class="range-val" id="net-thresh-val">0.55</span></label>
-            <label class="control-inline">Espaçamento <input id="net-spacing" type="range" min="80" max="190" value="130" step="5" /><span class="range-val" id="net-spacing-val">130</span></label>
+            <label class="control-inline"><span>Threshold</span> <input id="net-thresh" type="range" min="20" max="90" value="55" step="5" /><span class="range-val" id="net-thresh-val">0.55</span></label>
+            <label class="control-inline"><span>Espaçamento</span> <input id="net-spacing" type="range" min="80" max="190" value="130" step="5" /><span class="range-val" id="net-spacing-val">130</span></label>
             <div class="control-sm"><label for="net-label-mode">Etiquetas</label><select id="net-label-mode"><option value="short" selected>Curtas</option><option value="key">Código / n.º</option><option value="none">Sem etiquetas</option></select></div>
           </div>
         </div>
         <div class="network-layout"><canvas id="network-canvas"></canvas><aside class="node-list" id="node-list"></aside></div>
+        <div class="network-hint">Arraste o gráfico para deslocar a visualização.</div>
         <div class="legend" id="net-legend"></div>
       </div>
     </section>
@@ -269,9 +347,10 @@
     <section id="pares-uc" class="panel">
       <div class="panel-card">
         <div class="panel-head">
-          <div><h2 class="panel-title">Pares de UCs com maior afinidade</h2><p class="panel-sub">O ranking apresentado corresponde apenas à medida escolhida.</p></div>
+          <div><h2 class="panel-title">Afinidades UC</h2><p class="panel-sub">O ranking apresentado corresponde apenas à medida escolhida.</p></div>
           <div class="controls">
-            <div class="control-sm"><label for="puc-method">Medida</label><select id="puc-method"><option value="jaccard" selected>Jaccard (≥4)</option><option value="spearman">Spearman</option><option value="kendall">Kendall τ</option></select></div>
+            <div class="control-sm"><label for="puc-method">Medida</label><div class="method-wrap"><select id="puc-method"><option value="spearman" selected>Afinidade global (Spearman)</option><option value="jaccard">Preferências fortes (Jaccard ≥ 4)</option><option value="kendall">Robustez de ordenação (Kendall)</option></select><span class="method-help" tabindex="0" onmouseenter="tipMethod(event,this.closest('.control-sm').querySelector('select').value)" onmouseleave="hideTip()" onfocus="tipMethod(event,this.closest('.control-sm').querySelector('select').value)" onblur="hideTip()">?</span></div></div>
+            <div class="control-sm"><label for="puc-dir">Direção</label><select id="puc-dir"><option value="desc">Descendente</option><option value="asc">Ascendente</option></select></div>
             <div class="control-sm"><label for="puc-limit">Mostrar top</label><select id="puc-limit"><option value="10">10</option><option value="20" selected>20</option><option value="30">30</option><option value="50">50</option></select></div>
             <label class="control-inline">Threshold mín. <input id="puc-thresh" type="range" min="0" max="90" value="40" step="5" /><span class="range-val" id="puc-thresh-val">0.40</span></label>
           </div>
@@ -283,9 +362,10 @@
     <section id="pares-doc" class="panel">
       <div class="panel-card">
         <div class="panel-head">
-          <div><h2 class="panel-title">Pares de docentes com maior afinidade</h2><p class="panel-sub">O ranking apresentado corresponde apenas à medida escolhida.</p></div>
+          <div><h2 class="panel-title">Afinidades docentes</h2><p class="panel-sub">O ranking apresentado corresponde apenas à medida escolhida.</p></div>
           <div class="controls">
-            <div class="control-sm"><label for="pdoc-method">Medida</label><select id="pdoc-method"><option value="jaccard" selected>Jaccard (≥4)</option><option value="spearman">Spearman</option><option value="kendall">Kendall τ</option></select></div>
+            <div class="control-sm"><label for="pdoc-method">Medida</label><div class="method-wrap"><select id="pdoc-method"><option value="spearman" selected>Afinidade global (Spearman)</option><option value="jaccard">Preferências fortes (Jaccard ≥ 4)</option><option value="kendall">Robustez de ordenação (Kendall)</option></select><span class="method-help" tabindex="0" onmouseenter="tipMethod(event,this.closest('.control-sm').querySelector('select').value)" onmouseleave="hideTip()" onfocus="tipMethod(event,this.closest('.control-sm').querySelector('select').value)" onblur="hideTip()">?</span></div></div>
+            <div class="control-sm"><label for="pdoc-dir">Direção</label><select id="pdoc-dir"><option value="desc">Descendente</option><option value="asc">Ascendente</option></select></div>
             <div class="control-sm"><label for="pdoc-limit">Mostrar top</label><select id="pdoc-limit"><option value="10">10</option><option value="20" selected>20</option><option value="30">30</option><option value="50">50</option></select></div>
             <label class="control-inline">Threshold mín. <input id="pdoc-thresh" type="range" min="0" max="90" value="30" step="5" /><span class="range-val" id="pdoc-thresh-val">0.30</span></label>
           </div>
@@ -293,7 +373,32 @@
         <div id="pares-doc-container"></div>
       </div>
     </section>
+  <!-- Nota Metodológica -->
+  <section id="nota-metodologica" class="panel">
+    <div class="panel-card method-card" style="padding:28px 32px">
+      <div class="method-eyebrow">Informação de leitura e método</div>
+      <h2 class="panel-title" style="margin-bottom:18px">Nota metodológica</h2>
+      <div style="color:var(--muted);font-size:.97rem;line-height:1.7;display:grid;gap:14px;max-width:900px">
+        <p><strong style="color:var(--text)">Fonte de dados.</strong> Os dados provêm de um questionário de preferências docentes preenchido individualmente. Cada docente atribuiu uma pontuação de 1 a 5 a cada Unidade Curricular (UC) — sendo 1 "sem preferência" e 5 "primeira escolha". A análise cobre <span id="nota-ucs">—</span> UCs e <span id="nota-docentes">—</span> docentes.</p>
+        <p><strong style="color:var(--text)">Métricas de preferência.</strong> Os painéis <em>Preferência por UC</em> e <em>Preferência por Docente</em> ordenam as unidades curriculares ou docentes pela contagem de respostas 5 (primeira escolha), 4 ou 5 (preferência), média aritmética, soma ou desvio padrão das respostas recebidas. Todas as métricas são recalculadas dinamicamente de acordo com os filtros ativos.</p>
+        <p><strong style="color:var(--text)">Medidas de afinidade.</strong> As afinidades entre pares de UCs ou entre pares de docentes são calculadas com base nos vetores de preferência de cada entidade:</p>
+        <ul style="padding-left:22px;display:grid;gap:6px">
+          <li><strong style="color:var(--text)">Spearman ρ</strong> — correlação de ordem entre os perfis de preferência. Valor entre −1 e 1; valores ≥ 0.70 indicam afinidade forte.</li>
+          <li><strong style="color:var(--text)">Jaccard (≥ 4)</strong> — rácio de sobreposição dos conjuntos de UCs/docentes com pontuação ≥ 4. Valor entre 0 e 1; mede apenas concordância nas escolhas mais elevadas.</li>
+          <li><strong style="color:var(--text)">Kendall τ</strong> — correlação de concordância entre ordenações; mais robusto a empates do que Spearman.</li>
+        </ul>
+        <p>O cálculo é efetuado apenas sobre os pares de observações em que ambas as entidades responderam (remoção de omissos por par). Um mínimo de 2 observações válidas é exigido; pares com menos observações têm afinidade reportada como 0.</p>
+        <p><strong style="color:var(--text)">Rede de proximidades.</strong> O grafo mostra as <em>N</em> UCs (ou docentes) com maior número de respostas de alta preferência (≥ 4) nos filtros ativos. Cada aresta representa um par com afinidade ≥ threshold configurável. O layout é calculado por um algoritmo de força dirigida: nós ligados por arestas de alta afinidade são atraídos, enquanto nós sem ligação ou com baixa afinidade são repelidos — a proximidade visual é portanto um indicador qualitativo, não uma representação exacta da correlação numérica. A lista lateral ordena os nós por número de ligações (grau).</p>
+        <p><strong style="color:var(--text)">Filtros.</strong> Todos os indicadores são recalculados em tempo real conforme os filtros de semestre, ciclo, curso, área e universo de docentes selecionados. O filtro de <em>Docentes a tempo integral</em> / <em>Outros docentes</em> afecta os vetores usados no cálculo de afinidade entre UCs; o filtro de UC afecta os vetores usados no cálculo de afinidade entre docentes.</p>
+        <p style="color:var(--muted-2);font-size:.85rem">Dashboard desenvolvido para uso interno do DCSPT · Universidade de Aveiro. Os dados apresentados são confidenciais.</p>
+      </div>
+    </div>
+  </section>
+
   </main>
+
+
+
 </div>
 
 <script>
@@ -338,7 +443,7 @@ const DOCENTES_OUTROS = [
 ];
 
 let DATA = null;
-let ACTIVE_TAB = "heatmap";
+let ACTIVE_TAB = "ranking-ucs";
 let networkAnimation = null;
 
 const AREA_COLORS = {CP:"#818cf8",CS:"#6ee7b7",PRU:"#f472b6",CJ:"#fb923c",M:"#facc15",E:"#38bdf8",G:"#a78bfa",DSN:"#34d399",GER:"#f87171",I:"#fbbf24","—":"#64748b","":"#64748b"};
@@ -476,6 +581,26 @@ function loadExcelBuffer(buffer, sourceName){
   parseRows(rows, sourceName);
 }
 
+function loadExcelFile(file){
+  if(typeof XLSX === "undefined"){
+    setStatus(`A biblioteca XLSX não carregou. Para uso local sem internet, guarda xlsx.full.min.js na mesma pasta e altera o primeiro <script> para esse ficheiro local, ou abre esta página com ligação à internet.`);
+    return;
+  }
+  if(!file) return;
+  setStatus(`A carregar <span>${esc(file.name)}</span>...`);
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      loadExcelBuffer(e.target.result, file.name);
+    }catch(err){
+      setStatus(`Não consegui ler <span>${esc(file.name)}</span>. Confirma que é um ficheiro Excel com a estrutura esperada: metadados da UC nas primeiras colunas e docentes nas colunas seguintes com respostas 1–5.`);
+      console.error(err);
+    }
+  };
+  reader.onerror = () => setStatus(`Não consegui abrir <span>${esc(file.name)}</span>.`);
+  reader.readAsArrayBuffer(file);
+}
+
 function uniqueSorted(vals){
   return [...new Set(vals.filter(v => v !== null && v !== undefined && String(v).trim() !== "" && String(v).trim() !== "—").map(String))].sort((a,b)=>a.localeCompare(b,"pt"));
 }
@@ -487,6 +612,7 @@ function fillSelect(id, vals, label){
 }
 function initializeControls(){
   fillSelect("filter-sem", DATA.semestres, "Todos os semestres");
+  fillSelect("filter-ciclo", DATA.ciclos || [], "Todos os ciclos");
   fillSelect("filter-curso", DATA.cursos, "Todos os cursos");
   fillSelect("filter-area", DATA.areas, "Todas as áreas");
   populateFocusSelects();
@@ -506,12 +632,14 @@ function ucMeta(i){
 function filteredUCs(){
   if(!DATA) return [];
   const sem = document.getElementById("filter-sem").value;
+  const ciclo = document.getElementById("filter-ciclo").value;
   const curso = document.getElementById("filter-curso").value;
   const area = document.getElementById("filter-area").value;
   const q = normText(document.getElementById("search-uc").value);
   return DATA.ucs.map((_,i)=>i).filter(i => {
     const m = ucMeta(i);
     if(sem && String(m.sem) !== sem) return false;
+    if(ciclo && m.ciclo !== ciclo) return false;
     if(curso && m.curso !== curso) return false;
     if(area && m.area !== area) return false;
     if(q && !normText(`${m.id} ${m.nome} ${m.curso} ${m.area} ${m.tipo} ${m.ciclo} ${m.uo}`).includes(q)) return false;
@@ -557,7 +685,37 @@ function renderMetrics(){
     ["Soma", m.sum.toFixed(0), "soma das preferências"],
     ["Desvio / variação", m.sd.toFixed(2), "desvio padrão populacional"]
   ].map(([label,val,sub]) => `<div class="metric-box"><span class="metric-value">${esc(val)}</span><span>${esc(label)}</span><small>${esc(sub)}</small></div>`).join("");
-  document.getElementById("visible-count").textContent = `${ucIdx.length} de ${DATA.ucs.length} UCs visíveis · ${docIdx.length} de ${DATA.docentes.length} docentes considerados`;
+
+  // ── Melhoria 4: badges de filtros activos ──
+  const filterIds = ["filter-sem","filter-ciclo","filter-curso","filter-area","filter-docentes","search-uc"];
+  const filterLabels = {"filter-sem":"Semestre","filter-ciclo":"Ciclo","filter-curso":"Curso","filter-area":"Área","filter-docentes":"Docentes","search-uc":"Pesquisa"};
+  const activeFilters = filterIds.filter(id => {
+    const el = document.getElementById(id);
+    return el && el.value && el.value.trim() !== "";
+  });
+  const hasFilters = activeFilters.length > 0;
+  const vcEl = document.getElementById("visible-count");
+  const badges = activeFilters.map(id => {
+    const el = document.getElementById(id);
+    const val = el.tagName === "SELECT" ? (el.options[el.selectedIndex]?.text || el.value) : el.value;
+    return `<span class="filter-active-badge" title="Filtro activo. Clique no × para remover este filtro.">${esc(filterLabels[id])}: <strong>${esc(val)}</strong><span class="badge-x" onclick="clearOneFilter('${id}')" title="Remover este filtro">×</span></span>`;
+  }).join("");
+  const totalUCs = DATA ? DATA.ucs.length : 0, totalDocs = DATA ? DATA.docentes.length : 0;
+  const countText = `${ucIdx.length} de ${totalUCs} UCs visíveis · ${docIdx.length} de ${totalDocs} docentes considerados`;
+  vcEl.className = "visible-count" + (hasFilters ? " has-filters" : "");
+  vcEl.innerHTML = countText + (hasFilters ? `&ensp;${badges}` : "");
+
+  const notaUcs = document.getElementById("nota-ucs");
+  const notaDocentes = document.getElementById("nota-docentes");
+  if(notaUcs) notaUcs.textContent = totalUCs;
+  if(notaDocentes) notaDocentes.textContent = totalDocs;
+}
+
+function clearOneFilter(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.value = "";
+  renderAll();
 }
 
 function colorScore(v){
@@ -580,11 +738,16 @@ function corrTextColor(v){
   return Math.abs(v) > .2 ? "#07110b" : "#cbd5e1";
 }
 function renderHeatmap(){
+  const heatMin = document.getElementById("heat-min");
+  const heatMinVal = document.getElementById("heat-min-val");
+  const heatContainer = document.getElementById("heatmap-container");
+  if(!heatMin || !heatMinVal || !heatContainer) return;
+
   const ucIdx = filteredUCs(), docIdx = filteredDocentes();
-  const min = Number(document.getElementById("heat-min").value);
-  document.getElementById("heat-min-val").textContent = String(min);
+  const min = Number(heatMin.value);
+  heatMinVal.textContent = String(min);
   if(!ucIdx.length || !docIdx.length){
-    document.getElementById("heatmap-container").innerHTML = `<div class="empty-state">Sem dados para os filtros selecionados.</div>`;
+    heatContainer.innerHTML = `<div class="empty-state">Sem dados para os filtros selecionados.</div>`;
     return;
   }
   let html = `<table><thead><tr><th class="sticky-col">UC</th>${docIdx.map(j => `<th class="doc-head" title="${esc(DATA.docentes[j])}">${esc(shortName(DATA.docentes[j]))}</th>`).join("")}</tr></thead><tbody>`;
@@ -599,40 +762,74 @@ function renderHeatmap(){
     html += `</tr>`;
   });
   html += `</tbody></table>`;
-  document.getElementById("heatmap-container").innerHTML = html;
+  heatContainer.innerHTML = html;
 }
 
-function rankingTableUC(rows){
-  const maxPref = Math.max(1, ...rows.map(r=>r.pref));
-  return `<table><thead><tr><th>#</th><th class="sticky-col">UC</th><th class="number">Primeira escolha</th><th class="number">Preferência 4–5</th><th class="number">Média</th><th class="number">Soma</th><th class="number">Desvio</th><th class="bar-cell">Preferência</th></tr></thead><tbody>${rows.map((r,k)=>{
+function rankingTableUC(rows, sortKey){
+  // Melhoria 5: bar max and value based on the active sort metric
+  const barKey = sortKey || "pref";
+  const maxVal = Math.max(1, ...rows.map(r => r[barKey] ?? 0));
+  const barLabel = {first:"Primeiras escolhas",pref:"Preferência 4–5",sum:"Soma",sd:"Desvio",avg:"Média"}[barKey] || "Preferência";
+  return `<table><thead><tr><th>#</th><th class="sticky-col">UC</th><th class="number">Primeira escolha</th><th class="number">Preferência 4–5</th><th class="number">Média</th><th class="number">Soma</th><th class="number">Desvio</th><th class="bar-cell" title="A barra representa a métrica activa seleccionada.">${esc(barLabel)}</th></tr></thead><tbody>${rows.map((r,k)=>{
     const m = ucMeta(r.i);
-    return `<tr><td class="number">${k+1}</td><td class="sticky-col"><div class="uc-name">${esc(m.nome)}</div><div class="meta">${esc(m.id)} · Sem ${esc(m.sem)} · ${esc(m.curso)} · ${esc(m.area)}</div></td><td class="number">${r.first}</td><td class="number">${r.pref}</td><td class="number">${r.avg.toFixed(2)}</td><td class="number">${r.sum.toFixed(0)}</td><td class="number">${r.sd.toFixed(2)}</td><td class="bar-cell"><div class="bar"><span style="width:${(r.pref/maxPref*100).toFixed(1)}%"></span></div></td></tr>`;
+    const barVal = r[barKey] ?? 0;
+    return `<tr><td class="number">${k+1}</td><td class="sticky-col"><div class="uc-name">${esc(m.nome)}</div><div class="meta">${esc(m.id)} · Sem ${esc(m.sem)} · ${esc(m.curso)} · ${esc(m.area)}</div></td><td class="number">${r.first}</td><td class="number">${r.pref}</td><td class="number">${r.avg.toFixed(2)}</td><td class="number">${r.sum.toFixed(0)}</td><td class="number">${r.sd.toFixed(2)}</td><td class="bar-cell"><div class="bar" title="A barra representa a métrica activa seleccionada: ${esc(barLabel)}."><span style="width:${(barVal/maxVal*100).toFixed(1)}%"></span></div></td></tr>`;
   }).join("")}</tbody></table>`;
 }
 function renderUCRanking(){
   const docIdx = filteredDocentes();
+  const topN = Number(document.getElementById("uc-top-n").value);
   const sortKey = document.getElementById("uc-rank-sort").value;
   const dir = document.getElementById("uc-rank-dir").value;
+  document.getElementById("uc-top-n-val").textContent = String(topN);
   const rows = filteredUCs().map(i => metricsForUC(i, docIdx));
   rows.sort((a,b) => {
     const d = (a[sortKey] ?? 0) - (b[sortKey] ?? 0);
     return dir === "asc" ? d || a.i-b.i : -d || a.i-b.i;
   });
-  document.getElementById("uc-ranking-container").innerHTML = rankingTableUC(rows);
+  document.getElementById("uc-ranking-container").innerHTML = rankingTableUC(rows.slice(0, topN), sortKey);
 }
 function renderDocRanking(){
   const topN = Number(document.getElementById("doc-top-n").value);
+  const filter = document.getElementById("doc-rank-filter").value;
+  const dir = document.getElementById("doc-rank-dir").value;
   document.getElementById("doc-top-n-val").textContent = String(topN);
   const ucIdx = filteredUCs(), docIdx = filteredDocentes();
   if(!docIdx.length){
     document.getElementById("doc-ranking-container").innerHTML = `<div class="empty-state">Sem docentes para os filtros selecionados.</div>`;
     return;
   }
-  document.getElementById("doc-ranking-container").innerHTML = docIdx.map(j => {
+
+  // ── Melhoria 8: sort the doc CARDS by the same criterion as the selected "Ordenar por"
+  function docSortScore(j){
     const vals = valuesForDoc(j, ucIdx);
+    if(filter === "five")      return vals.filter(v=>v===5).length;
+    if(filter === "four-five") return vals.filter(v=>v>=4).length;
+    if(filter === "three")     return vals.filter(v=>v===3).length;
+    return vals.filter(v=>v<=2).length; // two-one
+  }
+  const docs = docIdx.map(j => ({j, sortVal: docSortScore(j)}));
+  docs.sort((a,b) => dir === "asc"
+    ? a.sortVal - b.sortVal || DATA.docentes[a.j].localeCompare(DATA.docentes[b.j], "pt")
+    : b.sortVal - a.sortVal || DATA.docentes[a.j].localeCompare(DATA.docentes[b.j], "pt"));
+
+  document.getElementById("doc-ranking-container").innerHTML = docs.map(({j}) => {
+    const vals = valuesForDoc(j, ucIdx);
+    const filterWeight = v => {
+      if(filter === "five")      return v === 5 ? 2 : 0;
+      if(filter === "four-five") return v >= 4 ? 2 : 0;
+      if(filter === "three")     return v === 3 ? 2 : 0;
+      return v <= 2 ? 2 : 0;
+    };
+    const rows = ucIdx.map(i => ({i, v: DATA.pref_matrix[i]?.[j]})).filter(r => Number.isFinite(r.v)).sort((a,b) => {
+      const pa = filterWeight(a.v), pb = filterWeight(b.v);
+      if(pb !== pa) return pb - pa;
+      return b.v - a.v || DATA.ucs[a.i].localeCompare(DATA.ucs[b.i], "pt");
+    }).slice(0,topN);
     const avg = mean(vals);
-    const rows = ucIdx.map(i => ({i, v: DATA.pref_matrix[i]?.[j]})).filter(r => Number.isFinite(r.v)).sort((a,b)=>b.v-a.v || DATA.ucs[a.i].localeCompare(DATA.ucs[b.i],"pt")).slice(0,topN);
-    return `<article class="ranking-card"><h3 title="${esc(DATA.docentes[j])}">${esc(DATA.docentes[j])}</h3><div class="card-metric">${esc(docGroupLabel(DATA.docente_groups[j]))} · média ${avg.toFixed(2)}</div>${rows.map((r,k)=>{const m=ucMeta(r.i);return `<div class="rank-row"><span>${k+1}</span><span class="rank-name" title="${esc(m.nome)}">${esc(m.nome)}</span><span class="score">${r.v}/5</span><span class="bar"><span style="width:${(r.v/5*100).toFixed(0)}%"></span></span></div>`}).join("")}</article>`;
+    const sortLabel = {five:"1ªs escolhas","four-five":"pref. 4–5",three:"indiferença",two_one:"pouca disp."}[filter] || "média";
+    const sortVal = docSortScore(j);
+    return `<article class="ranking-card"><h3 title="${esc(DATA.docentes[j])}">${esc(DATA.docentes[j])}</h3><div class="card-metric">${esc(docGroupLabel(DATA.docente_groups[j]))} · média ${avg.toFixed(2)} · ${esc({five:"primeiras escolhas",["four-five"]:"pref. 4–5",three:"indiferença",["two-one"]:"pouca disp."}[filter] || "")}: ${sortVal}</div>${rows.map((r,k)=>{const m=ucMeta(r.i);return `<div class="rank-row"><span>${k+1}</span><span class="rank-name" title="${esc(m.nome)}">${esc(m.nome)}</span><span class="score">${r.v}/5</span><span class="bar"><span style="width:${(r.v/5*100).toFixed(0)}%"></span></span></div>`}).join("")}</article>`;
   }).join("");
 }
 
@@ -739,10 +936,14 @@ function relationRowsDoc(focus, method){
 }
 
 function simplePairTableUC(rows){
-  return `<table class="pair-table"><thead><tr><th>UC</th><th class="number">Afinidade</th><th>Dados</th></tr></thead><tbody>${rows.map(r=>{const m=ucMeta(r.i);return `<tr><td><div class="uc-name">${esc(m.nome)}</div><div class="meta">${esc(m.id)} · Sem ${esc(m.sem)} · ${esc(m.curso)} · ${esc(m.area)}</div></td><td class="number"><span class="corr-pill" style="background:${colorCorr(r.score)}">${r.score.toFixed(3)}</span></td><td>${methodSafeText(r.score)}</td></tr>`}).join("")}</tbody></table>`;
+  return `<table class="pair-table"><thead><tr><th>UC</th><th class="number" title="Valor mais alto indica perfis mais semelhantes segundo a medida escolhida.">Afinidade</th><th title="Interpretação qualitativa do valor de afinidade.">Dados</th></tr></thead><tbody>${rows.map(r=>{const m=ucMeta(r.i);return `<tr><td><div class="uc-name">${esc(m.nome)}</div><div class="meta">${ucMetaLabel(m)}</div></td><td class="number"><span class="corr-pill" style="background:${colorCorr(r.score)}">${r.score.toFixed(3)}</span></td><td title="Interpretação qualitativa do valor de afinidade.">${methodSafeText(r.score)}</td></tr>`}).join("")}</tbody></table>`;
 }
 function methodSafeText(v){
   return v >= .70 ? "afinidade forte" : v >= .40 ? "afinidade moderada" : v >= .20 ? "afinidade fraca" : v <= -.40 ? "perfil diferente" : "baixa afinidade";
+}
+function ucMetaLabel(m){
+  const parts = [m.id && esc(m.id), m.sem && `Sem ${esc(m.sem)}`, m.curso && esc(m.curso), m.area && esc(m.area)].filter(Boolean);
+  return parts.join(" · ");
 }
 function renderUCAffinity(){
   populateFocusSelects();
@@ -752,15 +953,15 @@ function renderUCAffinity(){
     return;
   }
   const method = document.getElementById("uc-aff-method").value;
+  const order = document.getElementById("uc-aff-order").value;
   const topN = Number(document.getElementById("uc-affinity-topn").value);
   const allRows = relationRowsUC(focus, method);
-  const rows = allRows.slice(0, topN);
-  const opposite = [...allRows].sort((a,b)=>a.score-b.score).slice(0, topN);
-  const m = ucMeta(focus);
-  document.getElementById("uc-corr-container").innerHTML = `<div class="selected-subject"><div class="subject-title">${esc(m.nome)}</div><div>${esc(m.id)} · Sem ${esc(m.sem)} · ${esc(m.curso)} · ${esc(m.area)} · ${methodLabel(method)}</div></div><div class="affinity-grid"><div class="affinity-card"><h3>UCs mais semelhantes</h3>${simplePairTableUC(rows)}</div><div class="affinity-card"><h3>UCs mais diferentes</h3>${simplePairTableUC(opposite)}</div></div>`;
+  const rows = order === "asc" ? [...allRows].sort((a,b)=>a.score-b.score).slice(0, topN) : allRows.slice(0, topN);
+  const title = order === "asc" ? "UCs mais diferentes" : "UCs mais semelhantes";
+  document.getElementById("uc-corr-container").innerHTML = `<div class="affinity-grid"><div class="affinity-card"><h3>${esc(title)}</h3>${simplePairTableUC(rows)}</div></div>`;
 }
 function simplePairTableDoc(rows){
-  return `<table class="pair-table"><thead><tr><th>Docente</th><th>Grupo</th><th class="number">Afinidade</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(DATA.docentes[r.j])}</td><td>${esc(docGroupLabel(DATA.docente_groups[r.j]))}</td><td class="number"><span class="corr-pill" style="background:${colorCorr(r.score)}">${r.score.toFixed(3)}</span></td></tr>`).join("")}</tbody></table>`;
+  return `<table class="pair-table"><thead><tr><th>Docente</th><th class="number" title="Valor mais alto indica perfis mais semelhantes segundo a medida escolhida.">Afinidade</th><th title="Interpretação qualitativa do valor de afinidade.">Dados</th></tr></thead><tbody>${rows.map(r=>`<tr><td><div>${esc(DATA.docentes[r.j])}</div><div class="meta">${esc(docGroupLabel(DATA.docente_groups[r.j]))}</div></td><td class="number"><span class="corr-pill" style="background:${colorCorr(r.score)}">${r.score.toFixed(3)}</span></td><td title="Interpretação qualitativa do valor de afinidade.">${methodSafeText(r.score)}</td></tr>`).join("")}</tbody></table>`;
 }
 function renderDocAffinity(){
   populateFocusSelects();
@@ -770,15 +971,17 @@ function renderDocAffinity(){
     return;
   }
   const method = document.getElementById("doc-aff-method").value;
+  const order = document.getElementById("doc-aff-order").value;
   const topN = Number(document.getElementById("doc-affinity-topn").value);
   const allRows = relationRowsDoc(focus, method);
-  const rows = allRows.slice(0, topN);
-  const opposite = [...allRows].sort((a,b)=>a.score-b.score).slice(0, topN);
-  document.getElementById("doc-corr-container").innerHTML = `<div class="selected-subject"><div class="subject-title">${esc(DATA.docentes[focus])}</div><div>${esc(docGroupLabel(DATA.docente_groups[focus]))} · ${methodLabel(method)}</div></div><div class="affinity-grid"><div class="affinity-card"><h3>Docentes mais semelhantes</h3>${simplePairTableDoc(rows)}</div><div class="affinity-card"><h3>Docentes mais diferentes</h3>${simplePairTableDoc(opposite)}</div></div>`;
+  const rows = order === "asc" ? [...allRows].sort((a,b)=>a.score-b.score).slice(0, topN) : allRows.slice(0, topN);
+  const title = order === "asc" ? "Docentes mais diferentes" : "Docentes mais semelhantes";
+  document.getElementById("doc-corr-container").innerHTML = `<div class="affinity-grid"><div class="affinity-card"><h3>${esc(title)}</h3>${simplePairTableDoc(rows)}</div></div>`;
 }
 
 function renderPairsUC(){
   const method = document.getElementById("puc-method").value;
+  const dir = document.getElementById("puc-dir").value;
   const limit = Number(document.getElementById("puc-limit").value);
   const thresh = Number(document.getElementById("puc-thresh").value)/100;
   document.getElementById("puc-thresh-val").textContent = thresh.toFixed(2);
@@ -789,15 +992,39 @@ function renderPairsUC(){
     const score = similarity(ucVector(i, docIdx), ucVector(j, docIdx), method);
     if(score >= thresh) rows.push({i,j,score});
   }
-  rows.sort((a,b)=>b.score-a.score);
+  rows.sort((a,b)=> dir === "asc" ? a.score-b.score : b.score-a.score);
   document.getElementById("pares-uc-container").innerHTML = `<p class="mini-note" style="margin-bottom:10px">${rows.length} pares encontrados com ${methodLabel(method)} ≥ ${thresh.toFixed(2)}.</p>${pairsUCTable(rows.slice(0,limit))}`;
 }
 function pairsUCTable(rows){
   if(!rows.length) return `<div class="empty-state">Sem pares para o threshold selecionado.</div>`;
-  return `<div class="table-wrap"><table class="pair-table"><thead><tr><th>#</th><th>UC A</th><th>UC B</th><th class="number">Afinidade</th></tr></thead><tbody>${rows.map((r,k)=>{const a=ucMeta(r.i), b=ucMeta(r.j);return `<tr><td>${k+1}</td><td><div class="uc-name">${esc(a.nome)}</div><div class="meta">${esc(a.id)} · ${esc(a.curso)} · ${esc(a.area)}</div></td><td><div class="uc-name">${esc(b.nome)}</div><div class="meta">${esc(b.id)} · ${esc(b.curso)} · ${esc(b.area)}</div></td><td class="number"><span class="corr-pill" style="background:${colorCorr(r.score)}">${r.score.toFixed(3)}</span></td></tr>`}).join("")}</tbody></table></div>`;
+  return `<div class="table-wrap"><table class="pair-table"><thead><tr><th>#</th><th>UC A</th><th>UC B</th><th class="number" title="Valor mais alto indica perfis mais semelhantes segundo a medida escolhida.">Afinidade</th><th title="Interpretação qualitativa do valor de afinidade.">Dados</th></tr></thead><tbody>${rows.map((r,k)=>{const a=ucMeta(r.i), b=ucMeta(r.j);return `<tr><td>${k+1}</td><td><div class="uc-name">${esc(a.nome)}</div><div class="meta">${esc(a.id)} · ${esc(a.curso)} · ${esc(a.area)}</div><button class="jump-btn" type="button" onclick="goToUC(${r.i})" title="Consultar as afinidades a esta UC">↗ Consultar</button></td><td><div class="uc-name">${esc(b.nome)}</div><div class="meta">${esc(b.id)} · ${esc(b.curso)} · ${esc(b.area)}</div><button class="jump-btn" type="button" onclick="goToUC(${r.j})" title="Consultar as afinidades a esta UC">↗ Consultar</button></td><td class="number"><span class="corr-pill" style="background:${colorCorr(r.score)}">${r.score.toFixed(3)}</span></td><td title="Interpretação qualitativa do valor de afinidade.">${methodSafeText(r.score)}</td></tr>`;}).join("")}</tbody></table></div>`;
 }
+function pairsDocTable(rows){
+  if(!rows.length) return `<div class="empty-state">Sem pares para o threshold selecionado.</div>`;
+  return `<div class="table-wrap"><table class="pair-table"><thead><tr><th>#</th><th>Docente A</th><th>Docente B</th><th class="number" title="Valor mais alto indica perfis mais semelhantes segundo a medida escolhida.">Afinidade</th><th title="Interpretação qualitativa do valor de afinidade.">Dados</th></tr></thead><tbody>${rows.map((r,k)=>`<tr><td>${k+1}</td><td>${esc(DATA.docentes[r.i])}<div class="meta">${esc(docGroupLabel(DATA.docente_groups[r.i]))}</div><button class="jump-btn" type="button" onclick="goToDoc(${r.i})" title="Consulta afinidades a este docente">↗ Consultar</button></td><td>${esc(DATA.docentes[r.j])}<div class="meta">${esc(docGroupLabel(DATA.docente_groups[r.j]))}</div><button class="jump-btn" type="button" onclick="goToDoc(${r.j})" title="Consulta afinidades a este docente">↗ Consultar</button></td><td class="number"><span class="corr-pill" style="background:${colorCorr(r.score)}">${r.score.toFixed(3)}</span></td><td title="Interpretação qualitativa do valor de afinidade.">${methodSafeText(r.score)}</td></tr>`).join("")}</tbody></table></div>`;
+}
+
+// ── Melhoria 6: cross-navigation helpers ──
+function goToUC(i){
+  switchTab("uc-corr");
+  populateFocusSelects();
+  const sel = document.getElementById("uc-focus");
+  if(sel) sel.value = String(i);
+  renderCurrent();
+  document.getElementById("uc-corr")?.scrollIntoView({behavior:"smooth", block:"start"});
+}
+function goToDoc(j){
+  switchTab("doc-corr");
+  populateFocusSelects();
+  const sel = document.getElementById("doc-focus");
+  if(sel) sel.value = String(j);
+  renderCurrent();
+  document.getElementById("doc-corr")?.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
 function renderPairsDoc(){
   const method = document.getElementById("pdoc-method").value;
+  const dir = document.getElementById("pdoc-dir").value;
   const limit = Number(document.getElementById("pdoc-limit").value);
   const thresh = Number(document.getElementById("pdoc-thresh").value)/100;
   document.getElementById("pdoc-thresh-val").textContent = thresh.toFixed(2);
@@ -808,22 +1035,33 @@ function renderPairsDoc(){
     const score = similarity(docVector(i, ucIdx), docVector(j, ucIdx), method);
     if(score >= thresh) rows.push({i,j,score});
   }
-  rows.sort((a,b)=>b.score-a.score);
+  rows.sort((a,b)=> dir === "asc" ? a.score-b.score : b.score-a.score);
   document.getElementById("pares-doc-container").innerHTML = `<p class="mini-note" style="margin-bottom:10px">${rows.length} pares encontrados com ${methodLabel(method)} ≥ ${thresh.toFixed(2)}.</p>${pairsDocTable(rows.slice(0,limit))}`;
 }
-function pairsDocTable(rows){
-  if(!rows.length) return `<div class="empty-state">Sem pares para o threshold selecionado.</div>`;
-  return `<div class="table-wrap"><table class="pair-table"><thead><tr><th>#</th><th>Docente A</th><th>Docente B</th><th class="number">Afinidade</th></tr></thead><tbody>${rows.map((r,k)=>`<tr><td>${k+1}</td><td>${esc(DATA.docentes[r.i])}<div class="meta">${esc(docGroupLabel(DATA.docente_groups[r.i]))}</div></td><td>${esc(DATA.docentes[r.j])}<div class="meta">${esc(docGroupLabel(DATA.docente_groups[r.j]))}</div></td><td class="number"><span class="corr-pill" style="background:${colorCorr(r.score)}">${r.score.toFixed(3)}</span></td></tr>`).join("")}</tbody></table></div>`;
+
+// ── Melhoria 10: tooltip de medida ──
+const METHOD_TIPS = {
+  spearman: "<strong>Spearman ρ</strong> — Compara a ordem das preferências. Bom para perceber perfis semelhantes.",
+  jaccard:  "<strong>Jaccard (≥ 4)</strong> — Compara apenas escolhas fortes: respostas 4 ou 5.",
+  kendall:  "<strong>Kendall τ</strong> — Compara ordenações, sendo mais robusto quando há empates."
+};
+function tipMethod(e, method){
+  tip(e, METHOD_TIPS[method] || "");
 }
 
 function renderNetwork(){
   const canvas = document.getElementById("network-canvas"), ctx = canvas.getContext("2d");
+  canvas.title = "Cada nó representa uma UC ou um docente; cada ligação representa afinidade acima do threshold.";
   const ratio = window.devicePixelRatio || 1;
   const rect = canvas.getBoundingClientRect();
   canvas.width = Math.max(600, rect.width) * ratio;
   canvas.height = Math.max(420, rect.height) * ratio;
-  ctx.setTransform(ratio,0,0,ratio,0,0);
   const W = canvas.width / ratio, H = canvas.height / ratio;
+  const scale = 1;
+  let offsetX = 0, offsetY = 0, isDragging = false, dragStart = null;
+  canvas.style.cursor = "grab";
+  function applyTransform(){ ctx.setTransform(ratio * scale, 0, 0, ratio * scale, offsetX * ratio, offsetY * ratio); }
+  ctx.setTransform(ratio,0,0,ratio,0,0);
   const type = document.getElementById("net-type").value;
   const method = document.getElementById("net-method").value;
   const limit = Number(document.getElementById("net-limit").value);
@@ -865,14 +1103,27 @@ function renderNetwork(){
     const t = i / Math.max(1,n-1);
     const angle = i * 2.399963229728653;
     const radius = Math.sqrt(t) * Math.min(W,H) * 0.36;
-    return {i, label, key:keys[i], detail:detail[i], color:colors[i], x:W/2 + Math.cos(angle)*radius + (Math.random()-.5)*22, y:H/2 + Math.sin(angle)*radius + (Math.random()-.5)*22, vx:0, vy:0, degree:0};
+    // Deterministic initial position using golden-angle spiral (no Math.random)
+    return {i, label, key:keys[i], detail:detail[i], color:colors[i], x:W/2 + Math.cos(angle)*radius, y:H/2 + Math.sin(angle)*radius, vx:0, vy:0, degree:0};
   });
   edges.forEach(e => {nodes[e.i].degree++; nodes[e.j].degree++;});
+
+  // Pre-compute full similarity matrix for anti-gravity on low-similarity pairs
+  const simMatrix = [];
+  for(let i=0;i<n;i++){
+    simMatrix[i] = [];
+    for(let j=0;j<n;j++){
+      if(i===j){ simMatrix[i][j]=1; continue; }
+      if(j<i){ simMatrix[i][j]=simMatrix[j][i]; continue; }
+      simMatrix[i][j] = similarity(vectors[i], vectors[j], method);
+    }
+  }
+  const edgeSet = new Set(edges.map(e=>`${e.i}-${e.j}`));
 
   let iter = 0;
   function step(){
     iter++;
-    const repulsion = spacing * 75;
+    const repulsion = spacing * 110;
     const minDist = spacing * .56;
     for(let i=0;i<n;i++) for(let j=i+1;j<n;j++){
       const A=nodes[i], B=nodes[j];
@@ -886,12 +1137,26 @@ function renderNetwork(){
         A.vx -= push*dx/dist; A.vy -= push*dy/dist; B.vx += push*dx/dist; B.vy += push*dy/dist;
       }
     }
+    // Anti-gravity: push apart pairs that are NOT connected (low similarity)
+    for(let i=0;i<n;i++) for(let j=i+1;j<n;j++){
+      if(edgeSet.has(`${i}-${j}`)) continue;
+      const s = simMatrix[i][j];
+      if(s >= thresh) continue; // already handled as edge
+      const A=nodes[i], B=nodes[j];
+      const dx=B.x-A.x, dy=B.y-A.y;
+      const dist=Math.sqrt(dx*dx+dy*dy) || .01;
+      // Additional push-away proportional to how dissimilar they are
+      const pushF = (1-Math.max(0,s)) * spacing * 2 / (dist * dist);
+      const px = pushF*dx/dist, py = pushF*dy/dist;
+      A.vx -= px; A.vy -= py; B.vx += px; B.vy += py;
+    }
+    // Spring attraction: high similarity → shorter target distance
     edges.forEach(e => {
       const A=nodes[e.i], B=nodes[e.j];
       const dx=B.x-A.x, dy=B.y-A.y;
       const dist=Math.sqrt(dx*dx+dy*dy) || .01;
-      const target = spacing * (1.35 - Math.min(.8,e.s));
-      const f = (dist-target) * .004 * (0.5 + e.s);
+      const target = spacing * (1.2 - Math.min(.85, e.s * 0.9));
+      const f = (dist-target) * .012 * (0.4 + e.s * 1.2);
       A.vx += f*dx/dist; A.vy += f*dy/dist; B.vx -= f*dx/dist; B.vy -= f*dy/dist;
     });
     nodes.forEach(node => {
@@ -906,10 +1171,12 @@ function renderNetwork(){
       node.vx *= .82; node.vy *= .82;
     });
     draw();
-    if(iter < 420) networkAnimation = requestAnimationFrame(step);
+    if(iter < 700) networkAnimation = requestAnimationFrame(step);
   }
   function draw(){
-    ctx.clearRect(0,0,W,H);
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    applyTransform();
     edges.forEach(e => {
       const A=nodes[e.i], B=nodes[e.j];
       ctx.beginPath(); ctx.moveTo(A.x,A.y); ctx.lineTo(B.x,B.y);
@@ -928,15 +1195,39 @@ function renderNetwork(){
       }
     });
   }
+  canvas.onmousedown = e => {
+    if(e.button !== 0) return;
+    const r = canvas.getBoundingClientRect();
+    isDragging = true;
+    dragStart = {x: e.clientX, y: e.clientY, offsetX, offsetY};
+    canvas.style.cursor = "grabbing";
+    hideTip();
+  };
   canvas.onmousemove = e => {
     const r = canvas.getBoundingClientRect();
     const x = e.clientX - r.left, y = e.clientY - r.top;
-    const hit = nodes.find(node => (node.x-x)**2 + (node.y-y)**2 < 220);
+    if(isDragging){
+      offsetX = dragStart.offsetX + (e.clientX - dragStart.x) / scale;
+      offsetY = dragStart.offsetY + (e.clientY - dragStart.y) / scale;
+      draw();
+      return;
+    }
+    const wx = (x - offsetX) / scale, wy = (y - offsetY) / scale;
+    const hit = nodes.find(node => (node.x-wx)**2 + (node.y-wy)**2 < 220);
     if(hit) tip(e, `<span class=tip-title>${esc(hit.label)}</span><span class=soft>${esc(hit.key)} · ${esc(hit.detail)}<br>Ligações: ${hit.degree}</span>`);
     else hideTip();
   };
-  canvas.onmouseleave = hideTip;
-  document.getElementById("node-list").innerHTML = `<h3>${type === "doc" ? "Docentes" : "UCs"} na rede · ${methodLabel(method)}</h3>` + nodes.sort((a,b)=>b.degree-a.degree).map(n => `<div class="node-item"><span class="node-key">${esc(n.key)}</span><span>${esc(n.label)}<div class="meta">${esc(n.detail)} · ${n.degree} ligações</div></span></div>`).join("");
+  canvas.onmouseup = () => {
+    isDragging = false;
+    canvas.style.cursor = "grab";
+  };
+  canvas.onmouseleave = () => {
+    isDragging = false;
+    canvas.style.cursor = "grab";
+    hideTip();
+  };
+  // zoom removed to preserve legibility; canvas only supports panning via mouse drag.
+  document.getElementById("node-list").innerHTML = `<h3>${type === "doc" ? "Docentes" : "UCs"} na rede · ${methodLabel(method)}</h3>` + nodes.slice().sort((a,b)=>b.degree-a.degree).map(n => `<div class="node-item"><span class="node-key">${esc(n.key)}</span><span>${esc(n.label)}<div class="meta">${esc(n.detail)} · ${n.degree} ligações</div></span></div>`).join("");
   const legendItems = type === "doc" ? [["#6ee7b7","Tempo integral"],["#f472b6","Outros docentes"],["#64748b","Sem grupo"]] : [...new Set(indices.map(i=>ucMeta(i).area))].map(a => [AREA_COLORS[a] || "#64748b", a]);
   document.getElementById("net-legend").innerHTML = legendItems.map(([c,t]) => `<span><i class="dot" style="background:${c}"></i>${esc(t)}</span>`).join("");
   step();
@@ -953,8 +1244,29 @@ function tip(e, html){
 }
 function hideTip(){document.getElementById("tooltip").style.display="none";}
 
+function updateTopNControls(){
+  const ucTopN = document.getElementById("uc-top-n");
+  const docTopN = document.getElementById("doc-top-n");
+  if(!DATA) return;
+  const maxUC = Math.max(1, filteredUCs().length);
+  const maxDoc = Math.max(1, filteredDocentes().length);
+  if(ucTopN){
+    ucTopN.min = 1;
+    ucTopN.max = maxUC;
+    if(Number(ucTopN.value) > maxUC) ucTopN.value = maxUC;
+    document.getElementById("uc-top-n-val").textContent = String(ucTopN.value);
+  }
+  if(docTopN){
+    docTopN.min = 1;
+    docTopN.max = maxDoc;
+    if(Number(docTopN.value) > maxDoc) docTopN.value = maxDoc;
+    document.getElementById("doc-top-n-val").textContent = String(docTopN.value);
+  }
+}
+
 function renderCurrent(){
   if(!DATA) return;
+  updateTopNControls();
   renderMetrics();
   populateFocusSelects();
   if(ACTIVE_TAB === "heatmap") renderHeatmap();
@@ -968,28 +1280,106 @@ function renderCurrent(){
 }
 function renderAll(){
   if(!DATA) return;
-  renderMetrics();
-  renderHeatmap();
-}
-function clearFilters(){
-  ["filter-sem","filter-curso","filter-area","filter-docentes","search-uc"].forEach(id => {document.getElementById(id).value = "";});
+  // Render only the currently active tab. Some optional panels, such as the old
+  // heatmap view, may not exist in this version of the HTML; rendering all
+  // panels immediately after reading the Excel can therefore throw an error
+  // even when the file was parsed correctly.
   renderCurrent();
 }
+
+function switchTab(tabId){
+  if(!tabId) return;
+  document.querySelectorAll(".tab,.panel").forEach(x => x.classList.remove("active"));
+  const tab = document.querySelector(`.tab[data-tab="${tabId}"]`);
+  const panel = document.getElementById(tabId);
+  if(tab) tab.classList.add("active");
+  if(panel) panel.classList.add("active");
+  ACTIVE_TAB = tabId;
+}
+function clearFilters(){
+  ["filter-sem","filter-ciclo","filter-curso","filter-area","filter-docentes","search-uc"].forEach(id => {document.getElementById(id).value = "";});
+  renderCurrent();
+}
+
+function setTipForControl(id, text){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.title = text;
+  el.setAttribute("aria-label", text);
+  el.classList.add("has-tip");
+  const label = document.querySelector(`label[for="${id}"]`);
+  if(label){
+    label.title = text;
+    label.classList.add("has-tip");
+  }
+  const inline = el.closest("label.control-inline");
+  if(inline){
+    inline.title = text;
+    inline.classList.add("has-tip");
+  }
+}
+
+function applySuggestedTooltips(){
+  const tips = {
+    "filter-sem": "Mostra as UCs do semestre seleccionado.",
+    "filter-ciclo": "Filtra as UCs por ciclo de estudos.",
+    "filter-curso": "Mostra as UCs associadas ao curso seleccionado.",
+    "filter-area": "Filtra por área científica da UC.",
+    "filter-docentes": "Define que docentes entram nos cálculos e rankings.",
+    "search-uc": "Pesquisa por nome, código, curso, área ou ciclo.",
+    "uc-top-n": "Define quantas UCs aparecem no ranking.",
+    "uc-rank-sort": "Escolhe a métrica usada para ordenar as UCs.",
+    "uc-rank-dir": "Alterna entre valores mais altos e mais baixos.",
+    "doc-top-n": "Define quantas UCs aparecem em cada docente.",
+    "doc-rank-filter": "Ordena os docentes pelo tipo de resposta seleccionado.",
+    "doc-rank-dir": "Alterna entre valores mais altos e mais baixos.",
+    "uc-focus": "Selecciona a UC usada como referência na comparação.",
+    "doc-focus": "Selecciona o docente usado como referência na comparação.",
+    "uc-aff-order": "Mostra perfis com maior proximidade ou mais afastados do item seleccionado.",
+    "doc-aff-order": "Mostra perfis com maior proximidade ou mais afastados do item seleccionado.",
+    "uc-affinity-topn": "Define quantos resultados aparecem na consulta.",
+    "doc-affinity-topn": "Define quantos resultados aparecem na consulta.",
+    "puc-dir": "Alterna entre pares com afinidade mais alta ou mais baixa.",
+    "pdoc-dir": "Alterna entre pares com afinidade mais alta ou mais baixa.",
+    "puc-limit": "Define quantos pares de UCs aparecem na tabela.",
+    "pdoc-limit": "Define quantos pares de docentes aparecem na tabela.",
+    "puc-thresh": "Oculta pares de UCs com afinidade abaixo deste valor.",
+    "pdoc-thresh": "Oculta pares de docentes com afinidade abaixo deste valor.",
+    "net-type": "Alterna entre rede de UCs e rede de docentes.",
+    "net-limit": "Define o número máximo de nós mostrados na rede.",
+    "net-thresh": "Só mostra ligações com afinidade igual ou superior a este valor.",
+    "net-spacing": "Aumenta ou reduz a distância visual entre os nós.",
+    "net-label-mode": "Define como os nomes aparecem junto dos nós."
+  };
+  Object.entries(tips).forEach(([id, text]) => setTipForControl(id, text));
+  const clearBtn = document.getElementById("clear-filters");
+  if(clearBtn) clearBtn.title = "Remove todos os filtros activos.";
+  const openBtn = document.querySelector('label[for="excel-file"]');
+  if(openBtn) openBtn.title = "Escolher o ficheiro Excel com respostas 1–5.";
+}
+
 function bindEvents(){
-  ["filter-sem","filter-curso","filter-area","filter-docentes","search-uc"].forEach(id => document.getElementById(id).addEventListener("input", renderCurrent));
-  document.getElementById("clear-filters").addEventListener("click", clearFilters);
-  ["heat-min","uc-rank-sort","uc-rank-dir","doc-top-n","uc-focus","uc-aff-method","uc-affinity-topn","doc-focus","doc-aff-method","doc-affinity-topn","net-type","net-method","net-limit","net-thresh","net-spacing","net-label-mode","puc-method","puc-limit","puc-thresh","pdoc-method","pdoc-limit","pdoc-thresh"].forEach(id => document.getElementById(id).addEventListener("input", renderCurrent));
+  const fileInput = document.getElementById("excel-file");
+  if(fileInput) fileInput.addEventListener("change", e => loadExcelFile(e.target.files[0]));
+  ["filter-sem","filter-ciclo","filter-curso","filter-area","filter-docentes","search-uc"].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.addEventListener("input", renderCurrent);
+  });
+  const clearBtn = document.getElementById("clear-filters");
+  if(clearBtn) clearBtn.addEventListener("click", clearFilters);
+  ["uc-top-n","uc-rank-sort","uc-rank-dir","doc-top-n","doc-rank-filter","doc-rank-dir","uc-focus","uc-aff-method","uc-aff-order","uc-affinity-topn","doc-focus","doc-aff-method","doc-aff-order","doc-affinity-topn","net-type","net-method","net-limit","net-thresh","net-spacing","net-label-mode","puc-method","puc-dir","puc-limit","puc-thresh","pdoc-method","pdoc-dir","pdoc-limit","pdoc-thresh"].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.addEventListener("input", renderCurrent);
+  });
   document.querySelectorAll(".tab").forEach(btn => btn.addEventListener("click", () => {
-    document.querySelectorAll(".tab,.panel").forEach(x => x.classList.remove("active"));
-    btn.classList.add("active");
-    ACTIVE_TAB = btn.dataset.tab;
-    document.getElementById(ACTIVE_TAB).classList.add("active");
+    switchTab(btn.dataset.tab);
     renderCurrent();
   }));
   window.addEventListener("resize", () => { if(DATA && ACTIVE_TAB === "network") renderNetwork(); });
 }
 
 bindEvents();
+applySuggestedTooltips();
 loadExcelFromUrl(DATA_FILE);
 </script>
 </body>
