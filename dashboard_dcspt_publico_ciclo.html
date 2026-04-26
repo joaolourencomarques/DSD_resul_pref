@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Distribuição de Serviço Docente do DCSPT</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
+
+  :root{
+    --bg:#090b0f;
+    --surface:#151a21;
+    --surface-2:#101419;
+    --surface-3:#1c2430;
+    --border:#303744;
+    --border-soft:#252d39;
+    --text:#f6f8fb;
+    --muted:#aeb8c5;
+    --muted-2:#7e8998;
+    --blue:#1f3f70;
+    --green:#0d5935;
+    --gold:#694912;
+    --purple:#30275f;
+    --pink:#5b1f43;
+    --danger:#ef4444;
+    --ok:#4ade80;
+    --white-blue:#dbeafe;
+    --shadow:0 18px 70px rgba(0,0,0,.28);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 92% 8%, rgba(48,54,72,.32), transparent 34rem),
+      linear-gradient(180deg,#090b0f,#090b0f 60%,#080a0d);
+    color:var(--text);
+    font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    padding:20px;
+  }
+  .shell{max-width:1500px;margin:0 auto}
+  header.hero{padding:0 0 30px}
+  .hero h1{font-size:clamp(2.5rem,5.4vw,4.85rem);line-height:.94;letter-spacing:-.058em;font-weight:850;margin-bottom:14px}
+  .hero p{color:#c8d6e8;max-width:1120px;font-size:1.18rem;line-height:1.55}
+  .form-card,.panel-card{
+    background:linear-gradient(180deg,var(--surface),#131820);
+    border:1px solid var(--border);
+    border-radius:18px;
+    box-shadow:0 1px 0 rgba(255,255,255,.02) inset;
+  }
+  .form-card{padding:26px;margin-bottom:24px}
+  .form-grid{display:grid;gap:22px 16px}
+  .filters-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+  label{display:block;color:var(--muted);font-size:1rem;margin-bottom:8px}
+  input,select,button{font:inherit}
+  input,select{
+    width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:16px;
+    padding:17px 18px;color:var(--text);font-size:1.04rem;outline:none;min-height:58px;
+  }
+  input::placeholder{color:#777d87}
+  input:focus,select:focus{border-color:#6d7a8d;box-shadow:0 0 0 3px rgba(148,163,184,.12)}
+  .data-row,.form-actions{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .data-status,.visible-count{color:var(--muted);font-size:1.02rem;line-height:1.4}
+  .data-status span{color:var(--white-blue)}
+  .ghost-btn,.solid-btn{border-radius:14px;border:1px solid var(--border);padding:11px 14px;cursor:pointer;font-weight:500}
+  .ghost-btn{background:transparent;color:var(--white-blue)}
+  .ghost-btn:hover{background:#111720}
+  .solid-btn{background:var(--white-blue);border-color:var(--white-blue);color:#111827}
+
+  .metrics-strip{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:14px;margin:4px 0 0}
+  .metric-box{background:linear-gradient(180deg,var(--surface),#131820);border:1px solid var(--border);border-radius:18px;padding:18px 18px 16px;min-height:104px}
+  .metric-value{display:block;font-size:2.05rem;line-height:1;letter-spacing:-.045em;margin-bottom:8px;font-weight:400;color:var(--text)}
+  .metric-box span{display:block;color:var(--muted);font-size:.94rem;line-height:1.28}
+  .metric-box small{display:block;color:var(--muted-2);font-size:.78rem;margin-top:8px}
+
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;position:sticky;top:0;z-index:20;padding:8px 0;background:rgba(9,11,15,.88);backdrop-filter:blur(12px)}
+  .tab{border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:999px;padding:10px 14px;cursor:pointer;font-weight:500;transition:all .16s ease}
+  .tab:hover{color:var(--text);border-color:#596578}
+  .tab.active{background:#e5eefb;color:#0b1220;border-color:#e5eefb}
+  .panel{display:none}
+  .panel.active{display:block}
+  .panel-card{padding:18px;margin-bottom:22px}
+  .panel-head{display:flex;gap:12px;align-items:end;justify-content:space-between;flex-wrap:wrap;margin-bottom:16px}
+  .panel-title{font-size:1.35rem;letter-spacing:-.02em;font-weight:500}
+  .panel-sub{color:var(--muted);font-size:.98rem;margin-top:5px;line-height:1.35}
+  .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .control-sm{min-width:180px}
+  .control-sm select,.control-sm input{min-height:44px;padding:9px 12px;border-radius:12px;font-size:.94rem}
+  .control-inline{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.93rem}
+  .control-inline input[type=range]{width:140px;min-height:0;padding:0;accent-color:#dbeafe}
+  .range-val{font-weight:400;color:var(--white-blue);min-width:42px;text-align:right}
+
+  .table-wrap{overflow:auto;max-height:72vh;border:1px solid var(--border);border-radius:18px;background:var(--surface)}
+  table{border-collapse:separate;border-spacing:0;width:100%;font-size:.88rem}
+  th,td{border-bottom:1px solid var(--border-soft);padding:10px 11px;text-align:left;vertical-align:middle;white-space:nowrap;font-weight:400}
+  tbody tr:hover td,tbody tr:hover th{background:#1a212b}
+  thead th{position:sticky;top:0;background:#11161d;z-index:5;color:var(--muted);font-weight:500;text-transform:none}
+  .sticky-col{position:sticky;left:0;background:#151a21;z-index:4;min-width:350px;max-width:530px;white-space:normal;box-shadow:1px 0 0 var(--border-soft)}
+  thead .sticky-col{z-index:6;background:#11161d}
+  .uc-name{font-weight:400;color:#fff;line-height:1.25}
+  .meta{color:var(--muted);font-size:.78rem;margin-top:4px;line-height:1.35}
+  .number{text-align:right;font-variant-numeric:tabular-nums}
+  .bar-cell{min-width:150px}
+  .bar{height:9px;border-radius:999px;background:#273142;overflow:hidden}.bar span{display:block;height:100%;background:#dbeafe;border-radius:999px}
+  .heat-cell{text-align:center;font-weight:400;border-radius:8px;color:#07110b;min-width:36px;cursor:default;font-variant-numeric:tabular-nums}
+  .heat-cell.muted-cell{opacity:.16;color:transparent}
+  .doc-head{writing-mode:vertical-rl;text-orientation:mixed;height:150px;max-width:34px;white-space:normal;line-height:1.05;font-weight:400;color:#dbeafe}
+  .corr-cell{text-align:center;font-weight:400;font-variant-numeric:tabular-nums;min-width:54px;border-radius:8px;cursor:default}
+  .uc-head{max-width:150px;min-width:120px;white-space:normal;line-height:1.15;color:#dbeafe;font-weight:400}
+
+  .ranking-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px}
+  .ranking-card{background:linear-gradient(180deg,var(--surface),#141920);border:1px solid var(--border);border-radius:18px;padding:18px}
+  .ranking-card h3{font-size:1.02rem;margin-bottom:6px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:400}
+  .card-metric{color:var(--muted);font-size:.86rem;margin-bottom:10px}
+  .rank-row{display:grid;grid-template-columns:32px minmax(0,1fr) 42px 60px;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--border-soft)}
+  .rank-row:first-of-type{border-top:0}
+  .rank-row .rank-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:400;color:#f8fafc}
+  .rank-row .score{font-weight:400;color:#dbeafe;text-align:right}
+
+  .affinity-controls{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+  .affinity-summary{display:grid;gap:16px}
+  .affinity-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+  .affinity-card{background:linear-gradient(180deg,var(--surface),#141920);border:1px solid var(--border);border-radius:18px;padding:16px;min-width:0}
+  .affinity-card h3{font-size:1rem;font-weight:400;margin-bottom:10px;color:#f6f8fb;letter-spacing:-.01em}
+  .selected-subject{display:grid;gap:8px;background:#10161f;border:1px solid var(--border);border-radius:16px;padding:14px;color:var(--muted)}
+  .selected-subject .subject-title{font-size:1.05rem;color:#f6f8fb;font-weight:400;line-height:1.3}
+  .pair-table td,.pair-table th{white-space:normal}
+  .corr-pill{display:inline-flex;align-items:center;justify-content:center;min-width:58px;border-radius:999px;padding:5px 9px;color:#07110b;font-variant-numeric:tabular-nums;font-weight:400}
+  .mini-note{color:var(--muted);font-size:.9rem;line-height:1.45}
+
+  .network-layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;align-items:start}
+  canvas{width:100%;height:64vh;display:block;background:#11161d;border:1px solid var(--border);border-radius:18px}
+  .node-list{max-height:64vh;overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:12px}
+  .node-list h3{font-size:.95rem;margin:4px 4px 10px;color:#fff;font-weight:400}
+  .node-item{display:flex;gap:8px;padding:9px 6px;border-top:1px solid var(--border-soft);font-size:.86rem;line-height:1.25}
+  .node-item:first-of-type{border-top:0}.node-key{font-weight:400;color:#dbeafe;min-width:44px}
+  .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;color:var(--muted);font-size:.9rem}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px}
+
+  .empty-state{border:1px dashed var(--border);border-radius:18px;padding:32px;color:var(--muted);text-align:center;background:rgba(21,26,33,.45)}
+  #tooltip{position:fixed;display:none;pointer-events:none;z-index:1000;max-width:390px;background:#202838;border:1px solid #6b7c94;border-radius:12px;padding:12px 14px;box-shadow:0 18px 50px rgba(0,0,0,.45);font-size:.9rem;line-height:1.45;color:var(--text)}
+  #tooltip .tip-title{display:block;margin-bottom:5px;color:#fff;font-weight:400}
+  #tooltip .soft{color:var(--muted)}
+
+  @media(max-width:1180px){.filters-grid{grid-template-columns:repeat(2,1fr)}.metrics-strip{grid-template-columns:repeat(2,1fr)}.affinity-grid{grid-template-columns:1fr}.network-layout{grid-template-columns:1fr}.node-list{max-height:260px}}
+  @media(max-width:900px){body{padding:16px}.filters-grid,.metrics-strip{grid-template-columns:1fr}.tabs{position:static}.hero h1{font-size:2.55rem}.hero p{font-size:1.02rem}.sticky-col{min-width:280px}.form-card{padding:18px}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div id="tooltip"></div>
+  <header class="hero">
+    <h1>Distribuição de Serviço Docente do DCSPT</h1>
+    <p>Consulta informal para recolher manifestações de interesse relativamente às unidades curriculares do DCSPT. A escala usada é de 1 a 5: 1 Indisponível, 2 Como último recurso, 3 Indiferente, 4 Com interesse, 5 Primeira escolha.</p>
+  </header>
+
+  <section class="form-card">
+    <div class="form-grid">
+      <div class="data-row">
+        <div class="data-status" id="data-status">A carregar <span>inputdcspt_All.xlsx</span>...</div>
+      </div>
+      <div class="filters-grid">
+        <div><label for="filter-sem">Filtrar semestre</label><select id="filter-sem"><option value="">Todos os semestres</option></select></div>
+        <div><label for="filter-ciclo">Filtrar ciclo</label><select id="filter-ciclo"><option value="">Todos os ciclos</option></select></div>
+        <div><label for="filter-curso">Filtrar curso</label><select id="filter-curso"><option value="">Todos os cursos</option></select></div>
+        <div><label for="filter-area">Filtrar área</label><select id="filter-area"><option value="">Todas as áreas</option></select></div>
+        <div><label for="filter-docentes">Filtrar docentes</label><select id="filter-docentes"><option value="">Todos os docentes</option><option value="integral">Docentes a tempo integral</option><option value="outros">Outros docentes</option></select></div>
+        <div><label for="search-uc">Pesquisar UC</label><input id="search-uc" placeholder="Escreva parte do nome da UC..." /></div>
+      </div>
+      <div class="form-actions">
+        <div class="visible-count" id="visible-count"></div>
+        <button class="ghost-btn" type="button" id="clear-filters">Limpar filtros</button>
+      </div>
+      <section class="metrics-strip" id="top-metrics" aria-label="Métricas agregadas do conjunto filtrado"></section>
+    </div>
+  </section>
+
+  <nav class="tabs" aria-label="Navegação principal">
+    <button class="tab active" data-tab="heatmap">Respostas</button>
+    <button class="tab" data-tab="ranking-ucs">Ranking UCs</button>
+    <button class="tab" data-tab="doc-ranking">Ranking docentes</button>
+    <button class="tab" data-tab="uc-corr">Afinidades UC</button>
+    <button class="tab" data-tab="doc-corr">Afinidades docentes</button>
+    <button class="tab" data-tab="network">Rede</button>
+    <button class="tab" data-tab="pares-uc">Pares de UCs</button>
+    <button class="tab" data-tab="pares-doc">Pares de Docentes</button>
+  </nav>
+
+  <main>
+    <section id="heatmap" class="panel active">
+      <div class="panel-card">
+        <div class="panel-head">
+          <div><h2 class="panel-title">Respostas agregadas</h2><p class="panel-sub">As colunas de docentes e as linhas de UCs são lidas diretamente do Excel carregado.</p></div>
+          <div class="controls"><label class="control-inline">Min. visível <input id="heat-min" type="range" min="1" max="5" value="1" step="1" /><span class="range-val" id="heat-min-val">1</span></label></div>
+        </div>
+        <div class="table-wrap" id="heatmap-container"><div class="empty-state">A carregar dados...</div></div>
+      </div>
+    </section>
+
+    <section id="ranking-ucs" class="panel">
+      <div class="panel-card">
+        <div class="panel-head">
+          <div><h2 class="panel-title">Ranking UCs</h2><p class="panel-sub">Ranking recalculado com os filtros de UCs e de universo de docentes.</p></div>
+          <div class="controls">
+            <div class="control-sm"><label for="uc-rank-sort">Ordenar por</label><select id="uc-rank-sort"><option value="pref">Preferência (4 e 5)</option><option value="first">Primeira escolha (5)</option><option value="avg">Média</option><option value="sum">Soma</option><option value="sd">Desvio / variação</option></select></div>
+            <div class="control-sm"><label for="uc-rank-dir">Direção</label><select id="uc-rank-dir"><option value="desc">Descendente</option><option value="asc">Ascendente</option></select></div>
+          </div>
+        </div>
+        <div class="table-wrap" id="uc-ranking-container"></div>
+      </div>
+    </section>
+
+    <section id="doc-ranking" class="panel">
+      <div class="panel-card">
+        <div class="panel-head">
+          <div><h2 class="panel-title">Ranking docentes</h2><p class="panel-sub">Mostra as UCs preferidas por cada docente do universo selecionado.</p></div>
+          <div class="controls"><label class="control-inline">Top N <input id="doc-top-n" type="range" min="3" max="12" value="6" step="1" /><span class="range-val" id="doc-top-n-val">6</span></label></div>
+        </div>
+        <div class="ranking-grid" id="doc-ranking-container"></div>
+      </div>
+    </section>
+
+    <section id="uc-corr" class="panel">
+      <div class="panel-card">
+        <div class="panel-head">
+          <div><h2 class="panel-title">Afinidades UC</h2><p class="panel-sub">Afinidades recalculadas a partir das respostas dos docentes atualmente filtrados.</p></div>
+          <div class="affinity-controls">
+            <div class="control-sm"><label for="uc-focus">Escolher UC</label><select id="uc-focus"></select></div>
+            <div class="control-sm"><label for="uc-aff-method">Medida</label><select id="uc-aff-method"><option value="spearman" selected>Spearman</option><option value="jaccard">Jaccard (≥4)</option><option value="kendall">Kendall τ</option></select></div>
+            <div class="control-sm"><label for="uc-affinity-topn">Top</label><select id="uc-affinity-topn"><option value="10">10</option><option value="15" selected>15</option><option value="20">20</option><option value="30">30</option></select></div>
+          </div>
+        </div>
+        <div id="uc-corr-container" class="affinity-summary"></div>
+      </div>
+    </section>
+
+    <section id="doc-corr" class="panel">
+      <div class="panel-card">
+        <div class="panel-head">
+          <div><h2 class="panel-title">Afinidades docentes</h2><p class="panel-sub">Afinidades recalculadas com base nas UCs atualmente filtradas.</p></div>
+          <div class="affinity-controls">
+            <div class="control-sm"><label for="doc-focus">Escolher docente</label><select id="doc-focus"></select></div>
+            <div class="control-sm"><label for="doc-aff-method">Medida</label><select id="doc-aff-method"><option value="spearman" selected>Spearman</option><option value="jaccard">Jaccard (≥4)</option><option value="kendall">Kendall τ</option></select></div>
+            <div class="control-sm"><label for="doc-affinity-topn">Top</label><select id="doc-affinity-topn"><option value="8">8</option><option value="10" selected>10</option><option value="15">15</option><option value="20">20</option></select></div>
+          </div>
+        </div>
+        <div id="doc-corr-container" class="affinity-summary"></div>
+      </div>
+    </section>
+
+    <section id="network" class="panel">
+      <div class="panel-card">
+        <div class="panel-head">
+          <div><h2 class="panel-title">Rede de afinidades</h2><p class="panel-sub">Grafo com força de repulsão, colisão entre nós e etiquetas configuráveis.</p></div>
+          <div class="controls">
+            <div class="control-sm"><label for="net-type">Tipo</label><select id="net-type"><option value="uc">Rede de UCs</option><option value="doc">Rede de docentes</option></select></div>
+            <div class="control-sm"><label for="net-method">Medida</label><select id="net-method"><option value="spearman" selected>Spearman</option><option value="jaccard">Jaccard (≥4)</option><option value="kendall">Kendall τ</option></select></div>
+            <div class="control-sm"><label for="net-limit">Limite</label><select id="net-limit"><option value="30">30</option><option value="50" selected>50</option><option value="80">80</option></select></div>
+            <label class="control-inline">Threshold <input id="net-thresh" type="range" min="20" max="90" value="55" step="5" /><span class="range-val" id="net-thresh-val">0.55</span></label>
+            <label class="control-inline">Espaçamento <input id="net-spacing" type="range" min="80" max="190" value="130" step="5" /><span class="range-val" id="net-spacing-val">130</span></label>
+            <div class="control-sm"><label for="net-label-mode">Etiquetas</label><select id="net-label-mode"><option value="short" selected>Curtas</option><option value="key">Código / n.º</option><option value="none">Sem etiquetas</option></select></div>
+          </div>
+        </div>
+        <div class="network-layout"><canvas id="network-canvas"></canvas><aside class="node-list" id="node-list"></aside></div>
+        <div class="legend" id="net-legend"></div>
+      </div>
+    </section>
+
+    <section id="pares-uc" class="panel">
+      <div class="panel-card">
+        <div class="panel-head">
+          <div><h2 class="panel-title">Pares de UCs com maior afinidade</h2><p class="panel-sub">O ranking apresentado corresponde apenas à medida escolhida.</p></div>
+          <div class="controls">
+            <div class="control-sm"><label for="puc-method">Medida</label><select id="puc-method"><option value="jaccard" selected>Jaccard (≥4)</option><option value="spearman">Spearman</option><option value="kendall">Kendall τ</option></select></div>
+            <div class="control-sm"><label for="puc-limit">Mostrar top</label><select id="puc-limit"><option value="10">10</option><option value="20" selected>20</option><option value="30">30</option><option value="50">50</option></select></div>
+            <label class="control-inline">Threshold mín. <input id="puc-thresh" type="range" min="0" max="90" value="40" step="5" /><span class="range-val" id="puc-thresh-val">0.40</span></label>
+          </div>
+        </div>
+        <div id="pares-uc-container"></div>
+      </div>
+    </section>
+
+    <section id="pares-doc" class="panel">
+      <div class="panel-card">
+        <div class="panel-head">
+          <div><h2 class="panel-title">Pares de docentes com maior afinidade</h2><p class="panel-sub">O ranking apresentado corresponde apenas à medida escolhida.</p></div>
+          <div class="controls">
+            <div class="control-sm"><label for="pdoc-method">Medida</label><select id="pdoc-method"><option value="jaccard" selected>Jaccard (≥4)</option><option value="spearman">Spearman</option><option value="kendall">Kendall τ</option></select></div>
+            <div class="control-sm"><label for="pdoc-limit">Mostrar top</label><select id="pdoc-limit"><option value="10">10</option><option value="20" selected>20</option><option value="30">30</option><option value="50">50</option></select></div>
+            <label class="control-inline">Threshold mín. <input id="pdoc-thresh" type="range" min="0" max="90" value="30" step="5" /><span class="range-val" id="pdoc-thresh-val">0.30</span></label>
+          </div>
+        </div>
+        <div id="pares-doc-container"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const DATA_FILE = "inputdcspt_All.xlsx";
+
+const DOCENTES_TEMPO_INTEGRAL = [
+  "Carlos José de Oliveira e Silva Rodrigues",
+  "Elisabete Figueiredo",
+  "Fernando Manuel Martins Nogueira",
+  "Filipe Teles",
+  "Frederico Amado de Moura e Sá",
+  "Gonçalo Alves de Sousa Santinha",
+  "João Lourenço Marques",
+  "José Carlos Mota",
+  "José Manuel Gaspar Martins",
+  "Maria Cristina NRMA de Sousa Gomes",
+  "Miguel Lucas Pires",
+  "Patrícia Silva",
+  "Paulo dos Santos Silva",
+  "Paulo Ricardo Lopes Batista",
+  "Pedro Camões",
+  "Sara Margarida Alpendre Diogo",
+  "Sara Moreno Pires",
+  "Teresa Carvalho",
+  "Varqá Carlos Jalali"
+];
+
+const DOCENTES_OUTROS = [
+  "Gonçalo Branco Rosete",
+  "Marta Cristina Gomes Faria Patrão",
+  "Jan Wolf",
+  "Monique Borges",
+  "Nuno da Cruz",
+  "Alexandra Polido",
+  "Cláudia Figueiredo",
+  "Maria da Luz",
+  "Margarida Miguel Costeira e Pereira",
+  "Desiree de Jesus Vieira Poço Seixas",
+  "Gabriela Morena de Mello Chaves",
+  "Ana Maria Pacetti",
+  "Carlos Manuel Vieira de Matos Barros de Abreu"
+];
+
+let DATA = null;
+let ACTIVE_TAB = "heatmap";
+let networkAnimation = null;
+
+const AREA_COLORS = {CP:"#818cf8",CS:"#6ee7b7",PRU:"#f472b6",CJ:"#fb923c",M:"#facc15",E:"#38bdf8",G:"#a78bfa",DSN:"#34d399",GER:"#f87171",I:"#fbbf24","—":"#64748b","":"#64748b"};
+
+function normText(s){
+  return String(s ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s+/g," ").trim();
+}
+function esc(s){
+  return String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));
+}
+function num(v){
+  if(v === null || v === undefined || v === "") return null;
+  const n = Number(String(v).replace(",","."));
+  return Number.isFinite(n) ? n : null;
+}
+function isScore(v){
+  const n = num(v);
+  return n !== null && n >= 1 && n <= 5;
+}
+function mean(vals){
+  const arr = vals.filter(Number.isFinite);
+  return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
+}
+function std(vals){
+  const arr = vals.filter(Number.isFinite);
+  if(!arr.length) return 0;
+  const m = mean(arr);
+  return Math.sqrt(arr.reduce((a,b)=>a+Math.pow(b-m,2),0)/arr.length);
+}
+function shortName(name){
+  const parts = String(name).split(/\s+/).filter(Boolean);
+  if(parts.length <= 2) return name;
+  return `${parts[0]} ${parts[parts.length-1]}`;
+}
+function ucShort(name, n=46){
+  const s = String(name ?? "");
+  return s.length > n ? `${s.slice(0,n-1)}…` : s;
+}
+function docGroup(name){
+  const n = normText(name);
+  const integral = new Set(DOCENTES_TEMPO_INTEGRAL.map(normText));
+  const outros = new Set(DOCENTES_OUTROS.map(normText));
+  if(integral.has(n)) return "integral";
+  if(outros.has(n)) return "outros";
+  return "sem_grupo";
+}
+function docGroupLabel(g){
+  return g === "integral" ? "Tempo integral" : g === "outros" ? "Outros docentes" : "Sem grupo";
+}
+function setStatus(html){
+  document.getElementById("data-status").innerHTML = html;
+}
+
+function findHeader(headers, aliases){
+  const normalized = headers.map(normText);
+  for(const alias of aliases.map(normText)){
+    const idx = normalized.findIndex(h => h === alias || h.includes(alias));
+    if(idx >= 0) return idx;
+  }
+  return -1;
+}
+function getCell(row, idx){
+  return idx >= 0 ? row[idx] : "";
+}
+
+function parseRows(rows, sourceName){
+  if(!rows || rows.length < 2) throw new Error("O Excel não tem linhas suficientes.");
+  const headerRowIndex = rows.findIndex(r => Array.isArray(r) && r.some(c => normText(c) === "uc") && r.some(c => normText(c) === "id"));
+  const header = rows[headerRowIndex >= 0 ? headerRowIndex : 0].map(x => String(x ?? "").trim());
+  const dataRows = rows.slice((headerRowIndex >= 0 ? headerRowIndex : 0) + 1);
+
+  const colId = findHeader(header, ["ID", "Código", "Codigo"]);
+  const colUC = findHeader(header, ["UC", "Unidade Curricular", "Disciplina"]);
+  const colSem = findHeader(header, ["Sem", "Semestre"]);
+  const colTipo = findHeader(header, ["Tipo"]);
+  const colCurso = findHeader(header, ["Curso"]);
+  const colArea = findHeader(header, ["Área", "Area"]);
+  const colCiclo = findHeader(header, ["Ciclo"]);
+  const colUO = findHeader(header, ["UO", "Unidade Orgânica"]);
+  const colRowLabels = findHeader(header, ["Row Labels"]);
+  if(colUC < 0) throw new Error("Não encontrei uma coluna de UC. Esperava uma coluna chamada 'UC'.");
+
+  const metaCols = new Set([colId,colUC,colSem,colTipo,colCurso,colArea,colCiclo,colUO,colRowLabels].filter(i=>i>=0));
+  const validRows = dataRows.filter(r => normText(getCell(r,colUC)));
+  const docCols = header.map((h,i)=>({h,i})).filter(({h,i}) => {
+    if(!h || metaCols.has(i)) return false;
+    const scoreCount = validRows.reduce((acc,r)=>acc + (isScore(r[i]) ? 1 : 0), 0);
+    return scoreCount >= Math.max(3, Math.floor(validRows.length * 0.50));
+  });
+  if(!docCols.length) throw new Error("Não encontrei colunas de docentes com valores 1–5.");
+
+  const ucs = [], uc_ids = [], semestres = [], tipos = [], cursos = [], areas = [], ciclos = [], uos = [], pref_matrix = [];
+  validRows.forEach((r, idx) => {
+    const nome = String(getCell(r,colUC) ?? "").trim();
+    ucs.push(nome);
+    uc_ids.push(String(getCell(r,colId) || `UC${String(idx+1).padStart(3,"0")}`).trim());
+    semestres.push(num(getCell(r,colSem)) ?? String(getCell(r,colSem) ?? "").trim());
+    tipos.push(String(getCell(r,colTipo) || "—").trim() || "—");
+    cursos.push(String(getCell(r,colCurso) || "—").trim() || "—");
+    areas.push(String(getCell(r,colArea) || "—").trim() || "—");
+    ciclos.push(String(getCell(r,colCiclo) || "—").trim() || "—");
+    uos.push(String(getCell(r,colUO) || "—").trim() || "—");
+    pref_matrix.push(docCols.map(({i}) => num(r[i])));
+  });
+
+  const docentes = docCols.map(d => d.h);
+  const docente_groups = docentes.map(docGroup);
+  const unknown = docentes.filter((d,i)=>docente_groups[i]==="sem_grupo");
+
+  DATA = {sourceName, docentes, docente_groups, ucs, uc_ids, semestres, tipos, cursos, areas, ciclos, uos, pref_matrix};
+  setStatus(`Dados carregados de <span>${esc(sourceName)}</span>. ${ucs.length} UCs · ${docentes.length} docentes${unknown.length ? ` · ${unknown.length} sem grupo` : ""}.`);
+  initializeControls();
+  renderAll();
+}
+
+async function loadExcelFromUrl(url){
+  if(typeof XLSX === "undefined"){
+    setStatus(`A biblioteca XLSX não carregou. Confirma a ligação à internet ou guarda xlsx.full.min.js localmente.`);
+    return;
+  }
+  try{
+    setStatus(`A carregar <span>${esc(url)}</span>...`);
+    const response = await fetch(url, {cache:"no-store"});
+    if(!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+    const buffer = await response.arrayBuffer();
+    loadExcelBuffer(buffer, url);
+  }catch(err){
+    setStatus(`Não consegui carregar <span>${esc(url)}</span>. Confirma que o ficheiro Excel está publicado na mesma pasta do index.html no GitHub Pages.`);
+  }
+}
+function loadExcelBuffer(buffer, sourceName){
+  const wb = XLSX.read(buffer, {type:"array"});
+  const sheet = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(sheet, {header:1, defval:"", raw:true});
+  parseRows(rows, sourceName);
+}
+
+function uniqueSorted(vals){
+  return [...new Set(vals.filter(v => v !== null && v !== undefined && String(v).trim() !== "" && String(v).trim() !== "—").map(String))].sort((a,b)=>a.localeCompare(b,"pt"));
+}
+function fillSelect(id, vals, label){
+  const sel = document.getElementById(id);
+  const current = sel.value;
+  sel.innerHTML = `<option value="">${label}</option>` + uniqueSorted(vals).map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join("");
+  if([...sel.options].some(o => o.value === current)) sel.value = current;
+}
+function initializeControls(){
+  fillSelect("filter-sem", DATA.semestres, "Todos os semestres");
+  fillSelect("filter-ciclo", DATA.ciclos || [], "Todos os ciclos");
+  fillSelect("filter-curso", DATA.cursos, "Todos os cursos");
+  fillSelect("filter-area", DATA.areas, "Todas as áreas");
+  populateFocusSelects();
+}
+function ucMeta(i){
+  return {
+    id: DATA.uc_ids[i] || `UC${i+1}`,
+    nome: DATA.ucs[i] || "",
+    sem: DATA.semestres[i] || "—",
+    tipo: DATA.tipos[i] || "—",
+    curso: DATA.cursos[i] || "—",
+    area: DATA.areas[i] || "—",
+    ciclo: DATA.ciclos[i] || "—",
+    uo: DATA.uos[i] || "—"
+  };
+}
+function filteredUCs(){
+  if(!DATA) return [];
+  const sem = document.getElementById("filter-sem").value;
+  const ciclo = document.getElementById("filter-ciclo").value;
+  const curso = document.getElementById("filter-curso").value;
+  const area = document.getElementById("filter-area").value;
+  const q = normText(document.getElementById("search-uc").value);
+  return DATA.ucs.map((_,i)=>i).filter(i => {
+    const m = ucMeta(i);
+    if(sem && String(m.sem) !== sem) return false;
+    if(ciclo && m.ciclo !== ciclo) return false;
+    if(curso && m.curso !== curso) return false;
+    if(area && m.area !== area) return false;
+    if(q && !normText(`${m.id} ${m.nome} ${m.curso} ${m.area} ${m.tipo} ${m.ciclo} ${m.uo}`).includes(q)) return false;
+    return true;
+  });
+}
+function filteredDocentes(){
+  if(!DATA) return [];
+  const g = document.getElementById("filter-docentes").value;
+  return DATA.docentes.map((_,j)=>j).filter(j => !g || DATA.docente_groups[j] === g);
+}
+function filteredDocentesForPairing(){
+  return filteredDocentes();
+}
+function filteredUCsForPairing(){
+  return filteredUCs();
+}
+
+function valuesForUC(i, docIdx = filteredDocentes()){
+  return docIdx.map(j => DATA.pref_matrix[i]?.[j]).filter(Number.isFinite);
+}
+function valuesForDoc(j, ucIdx = filteredUCs()){
+  return ucIdx.map(i => DATA.pref_matrix[i]?.[j]).filter(Number.isFinite);
+}
+function metricsFromVals(vals){
+  const arr = vals.filter(Number.isFinite);
+  const sum = arr.reduce((a,b)=>a+b,0);
+  const avg = arr.length ? sum / arr.length : 0;
+  const sd = arr.length ? Math.sqrt(arr.reduce((a,b)=>a+Math.pow(b-avg,2),0)/arr.length) : 0;
+  return {count:arr.length, first:arr.filter(v=>v===5).length, pref:arr.filter(v=>v>=4).length, avg, sum, sd};
+}
+function metricsForUC(i, docIdx = filteredDocentes()){
+  return {i, ...metricsFromVals(valuesForUC(i, docIdx))};
+}
+function renderMetrics(){
+  const ucIdx = filteredUCs(), docIdx = filteredDocentes();
+  const vals = ucIdx.flatMap(i => docIdx.map(j => DATA.pref_matrix[i]?.[j])).filter(Number.isFinite);
+  const m = metricsFromVals(vals);
+  document.getElementById("top-metrics").innerHTML = [
+    ["Primeira escolha (5)", m.first, `${ucIdx.length} UCs · ${docIdx.length} docentes`],
+    ["Preferência (4 e 5)", m.pref, `${m.count} respostas consideradas`],
+    ["Média", m.avg.toFixed(2), "média das respostas filtradas"],
+    ["Soma", m.sum.toFixed(0), "soma das preferências"],
+    ["Desvio / variação", m.sd.toFixed(2), "desvio padrão populacional"]
+  ].map(([label,val,sub]) => `<div class="metric-box"><span class="metric-value">${esc(val)}</span><span>${esc(label)}</span><small>${esc(sub)}</small></div>`).join("");
+  document.getElementById("visible-count").textContent = `${ucIdx.length} de ${DATA.ucs.length} UCs visíveis · ${docIdx.length} de ${DATA.docentes.length} docentes considerados`;
+}
+
+function colorScore(v){
+  if(v >= 5) return "#4ade80";
+  if(v >= 4) return "#86efac";
+  if(v >= 3) return "#facc15";
+  if(v >= 2) return "#fb923c";
+  return "#334155";
+}
+function colorCorr(v){
+  if(v > .75) return "#4ade80";
+  if(v > .50) return "#86efac";
+  if(v > .20) return "#bbf7d0";
+  if(v > -.20) return "#475569";
+  if(v > -.50) return "#fca5a5";
+  if(v > -.75) return "#f87171";
+  return "#ef4444";
+}
+function corrTextColor(v){
+  return Math.abs(v) > .2 ? "#07110b" : "#cbd5e1";
+}
+function renderHeatmap(){
+  const ucIdx = filteredUCs(), docIdx = filteredDocentes();
+  const min = Number(document.getElementById("heat-min").value);
+  document.getElementById("heat-min-val").textContent = String(min);
+  if(!ucIdx.length || !docIdx.length){
+    document.getElementById("heatmap-container").innerHTML = `<div class="empty-state">Sem dados para os filtros selecionados.</div>`;
+    return;
+  }
+  let html = `<table><thead><tr><th class="sticky-col">UC</th>${docIdx.map(j => `<th class="doc-head" title="${esc(DATA.docentes[j])}">${esc(shortName(DATA.docentes[j]))}</th>`).join("")}</tr></thead><tbody>`;
+  ucIdx.forEach(i => {
+    const m = ucMeta(i);
+    html += `<tr><td class="sticky-col"><div class="uc-name">${esc(m.nome)}</div><div class="meta">${esc(m.id)} · Sem ${esc(m.sem)} · ${esc(m.tipo)} · ${esc(m.curso)} · ${esc(m.area)} · ${esc(m.ciclo)} · ${esc(m.uo)}</div></td>`;
+    docIdx.forEach(j => {
+      const v = DATA.pref_matrix[i]?.[j];
+      const muted = !Number.isFinite(v) || v < min;
+      html += `<td class="heat-cell ${muted ? "muted-cell" : ""}" style="background:${colorScore(v || 1)}" onmouseenter="tip(event,'<span class=tip-title>${esc(m.nome)}</span><span class=soft>${esc(DATA.docentes[j])}<br>Preferência: ${Number.isFinite(v)?v:"—"}/5</span>')" onmouseleave="hideTip()">${Number.isFinite(v)?v:""}</td>`;
+    });
+    html += `</tr>`;
+  });
+  html += `</tbody></table>`;
+  document.getElementById("heatmap-container").innerHTML = html;
+}
+
+function rankingTableUC(rows){
+  const maxPref = Math.max(1, ...rows.map(r=>r.pref));
+  return `<table><thead><tr><th>#</th><th class="sticky-col">UC</th><th class="number">Primeira escolha</th><th class="number">Preferência 4–5</th><th class="number">Média</th><th class="number">Soma</th><th class="number">Desvio</th><th class="bar-cell">Preferência</th></tr></thead><tbody>${rows.map((r,k)=>{
+    const m = ucMeta(r.i);
+    return `<tr><td class="number">${k+1}</td><td class="sticky-col"><div class="uc-name">${esc(m.nome)}</div><div class="meta">${esc(m.id)} · Sem ${esc(m.sem)} · ${esc(m.curso)} · ${esc(m.area)}</div></td><td class="number">${r.first}</td><td class="number">${r.pref}</td><td class="number">${r.avg.toFixed(2)}</td><td class="number">${r.sum.toFixed(0)}</td><td class="number">${r.sd.toFixed(2)}</td><td class="bar-cell"><div class="bar"><span style="width:${(r.pref/maxPref*100).toFixed(1)}%"></span></div></td></tr>`;
+  }).join("")}</tbody></table>`;
+}
+function renderUCRanking(){
+  const docIdx = filteredDocentes();
+  const sortKey = document.getElementById("uc-rank-sort").value;
+  const dir = document.getElementById("uc-rank-dir").value;
+  const rows = filteredUCs().map(i => metricsForUC(i, docIdx));
+  rows.sort((a,b) => {
+    const d = (a[sortKey] ?? 0) - (b[sortKey] ?? 0);
+    return dir === "asc" ? d || a.i-b.i : -d || a.i-b.i;
+  });
+  document.getElementById("uc-ranking-container").innerHTML = rankingTableUC(rows);
+}
+function renderDocRanking(){
+  const topN = Number(document.getElementById("doc-top-n").value);
+  document.getElementById("doc-top-n-val").textContent = String(topN);
+  const ucIdx = filteredUCs(), docIdx = filteredDocentes();
+  if(!docIdx.length){
+    document.getElementById("doc-ranking-container").innerHTML = `<div class="empty-state">Sem docentes para os filtros selecionados.</div>`;
+    return;
+  }
+  document.getElementById("doc-ranking-container").innerHTML = docIdx.map(j => {
+    const vals = valuesForDoc(j, ucIdx);
+    const avg = mean(vals);
+    const rows = ucIdx.map(i => ({i, v: DATA.pref_matrix[i]?.[j]})).filter(r => Number.isFinite(r.v)).sort((a,b)=>b.v-a.v || DATA.ucs[a.i].localeCompare(DATA.ucs[b.i],"pt")).slice(0,topN);
+    return `<article class="ranking-card"><h3 title="${esc(DATA.docentes[j])}">${esc(DATA.docentes[j])}</h3><div class="card-metric">${esc(docGroupLabel(DATA.docente_groups[j]))} · média ${avg.toFixed(2)}</div>${rows.map((r,k)=>{const m=ucMeta(r.i);return `<div class="rank-row"><span>${k+1}</span><span class="rank-name" title="${esc(m.nome)}">${esc(m.nome)}</span><span class="score">${r.v}/5</span><span class="bar"><span style="width:${(r.v/5*100).toFixed(0)}%"></span></span></div>`}).join("")}</article>`;
+  }).join("");
+}
+
+function paired(a,b){
+  const A=[], B=[];
+  for(let i=0; i<Math.min(a.length,b.length); i++){
+    if(Number.isFinite(a[i]) && Number.isFinite(b[i])){A.push(a[i]);B.push(b[i]);}
+  }
+  return [A,B];
+}
+function pearson(a,b){
+  const [A,B] = paired(a,b);
+  const n = A.length;
+  if(n < 2) return 0;
+  const ma = mean(A), mb = mean(B);
+  let nume = 0, da = 0, db = 0;
+  for(let i=0;i<n;i++){
+    const xa = A[i]-ma, xb = B[i]-mb;
+    nume += xa*xb; da += xa*xa; db += xb*xb;
+  }
+  const den = Math.sqrt(da*db);
+  return den ? nume/den : 0;
+}
+function ranks(vals){
+  const sorted = vals.map((v,i)=>({v,i})).sort((a,b)=>a.v-b.v);
+  const r = Array(vals.length);
+  for(let i=0;i<sorted.length;){
+    let j = i + 1;
+    while(j < sorted.length && sorted[j].v === sorted[i].v) j++;
+    const avgRank = (i + j - 1) / 2 + 1;
+    for(let k=i;k<j;k++) r[sorted[k].i] = avgRank;
+    i = j;
+  }
+  return r;
+}
+function spearman(a,b){
+  const [A,B] = paired(a,b);
+  if(A.length < 2) return 0;
+  return pearson(ranks(A), ranks(B));
+}
+function kendall(a,b){
+  const [A,B] = paired(a,b);
+  let c=0,d=0,ta=0,tb=0;
+  for(let i=0;i<A.length;i++) for(let j=i+1;j<A.length;j++){
+    const da = A[i]-A[j], db = B[i]-B[j];
+    if(da === 0 && db === 0) continue;
+    if(da === 0) ta++;
+    else if(db === 0) tb++;
+    else if(da*db > 0) c++;
+    else d++;
+  }
+  const den = Math.sqrt((c+d+ta)*(c+d+tb));
+  return den ? (c-d)/den : 0;
+}
+function jaccard(a,b){
+  const [A,B] = paired(a,b);
+  let inter=0, uni=0;
+  for(let i=0;i<A.length;i++){
+    const aa = A[i] >= 4, bb = B[i] >= 4;
+    if(aa || bb) uni++;
+    if(aa && bb) inter++;
+  }
+  return uni ? inter/uni : 0;
+}
+function similarity(a,b,method){
+  if(method === "jaccard") return jaccard(a,b);
+  if(method === "kendall") return kendall(a,b);
+  return spearman(a,b);
+}
+function methodLabel(m){
+  return m === "jaccard" ? "Jaccard (≥4)" : m === "kendall" ? "Kendall τ" : "Spearman";
+}
+
+function ucVector(i, docIdx = filteredDocentes()){
+  return docIdx.map(j => DATA.pref_matrix[i]?.[j]);
+}
+function docVector(j, ucIdx = filteredUCs()){
+  return ucIdx.map(i => DATA.pref_matrix[i]?.[j]);
+}
+function populateFocusSelects(){
+  if(!DATA) return;
+  const ucOptions = filteredUCs().map(i => `<option value="${i}">${esc(DATA.uc_ids[i])} · ${esc(ucShort(DATA.ucs[i],70))}</option>`).join("");
+  const docOptions = filteredDocentes().map(j => `<option value="${j}">${esc(DATA.docentes[j])}</option>`).join("");
+  const ucFocus = document.getElementById("uc-focus");
+  const docFocus = document.getElementById("doc-focus");
+  const oldUc = ucFocus.value, oldDoc = docFocus.value;
+  ucFocus.innerHTML = ucOptions;
+  docFocus.innerHTML = docOptions;
+  if([...ucFocus.options].some(o => o.value === oldUc)) ucFocus.value = oldUc;
+  if([...docFocus.options].some(o => o.value === oldDoc)) docFocus.value = oldDoc;
+}
+function relationRowsUC(focus, method){
+  const ucIdx = filteredUCs().filter(i => i !== focus);
+  const docIdx = filteredDocentes();
+  const base = ucVector(focus, docIdx);
+  return ucIdx.map(i => ({i, score: similarity(base, ucVector(i, docIdx), method)})).sort((a,b)=>b.score-a.score);
+}
+
+function relationRowsDoc(focus, method){
+  const docIdx = filteredDocentes().filter(j => j !== focus);
+  const ucIdx = filteredUCs();
+  const base = docVector(focus, ucIdx);
+  return docIdx.map(j => ({j, score: similarity(base, docVector(j, ucIdx), method)})).sort((a,b)=>b.score-a.score);
+}
+
+function simplePairTableUC(rows){
+  return `<table class="pair-table"><thead><tr><th>UC</th><th class="number">Afinidade</th><th>Dados</th></tr></thead><tbody>${rows.map(r=>{const m=ucMeta(r.i);return `<tr><td><div class="uc-name">${esc(m.nome)}</div><div class="meta">${esc(m.id)} · Sem ${esc(m.sem)} · ${esc(m.curso)} · ${esc(m.area)}</div></td><td class="number"><span class="corr-pill" style="background:${colorCorr(r.score)}">${r.score.toFixed(3)}</span></td><td>${methodSafeText(r.score)}</td></tr>`}).join("")}</tbody></table>`;
+}
+function methodSafeText(v){
+  return v >= .70 ? "afinidade forte" : v >= .40 ? "afinidade moderada" : v >= .20 ? "afinidade fraca" : v <= -.40 ? "perfil diferente" : "baixa afinidade";
+}
+function renderUCAffinity(){
+  populateFocusSelects();
+  const focus = Number(document.getElementById("uc-focus").value);
+  if(!Number.isFinite(focus)){
+    document.getElementById("uc-corr-container").innerHTML = `<div class="empty-state">Sem UCs para os filtros selecionados.</div>`;
+    return;
+  }
+  const method = document.getElementById("uc-aff-method").value;
+  const topN = Number(document.getElementById("uc-affinity-topn").value);
+  const allRows = relationRowsUC(focus, method);
+  const rows = allRows.slice(0, topN);
+  const opposite = [...allRows].sort((a,b)=>a.score-b.score).slice(0, topN);
+  const m = ucMeta(focus);
+  document.getElementById("uc-corr-container").innerHTML = `<div class="selected-subject"><div class="subject-title">${esc(m.nome)}</div><div>${esc(m.id)} · Sem ${esc(m.sem)} · ${esc(m.curso)} · ${esc(m.area)} · ${methodLabel(method)}</div></div><div class="affinity-grid"><div class="affinity-card"><h3>UCs mais semelhantes</h3>${simplePairTableUC(rows)}</div><div class="affinity-card"><h3>UCs mais diferentes</h3>${simplePairTableUC(opposite)}</div></div>`;
+}
+function simplePairTableDoc(rows){
+  return `<table class="pair-table"><thead><tr><th>Docente</th><th>Grupo</th><th class="number">Afinidade</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(DATA.docentes[r.j])}</td><td>${esc(docGroupLabel(DATA.docente_groups[r.j]))}</td><td class="number"><span class="corr-pill" style="background:${colorCorr(r.score)}">${r.score.toFixed(3)}</span></td></tr>`).join("")}</tbody></table>`;
+}
+function renderDocAffinity(){
+  populateFocusSelects();
+  const focus = Number(document.getElementById("doc-focus").value);
+  if(!Number.isFinite(focus)){
+    document.getElementById("doc-corr-container").innerHTML = `<div class="empty-state">Sem docentes para os filtros selecionados.</div>`;
+    return;
+  }
+  const method = document.getElementById("doc-aff-method").value;
+  const topN = Number(document.getElementById("doc-affinity-topn").value);
+  const allRows = relationRowsDoc(focus, method);
+  const rows = allRows.slice(0, topN);
+  const opposite = [...allRows].sort((a,b)=>a.score-b.score).slice(0, topN);
+  document.getElementById("doc-corr-container").innerHTML = `<div class="selected-subject"><div class="subject-title">${esc(DATA.docentes[focus])}</div><div>${esc(docGroupLabel(DATA.docente_groups[focus]))} · ${methodLabel(method)}</div></div><div class="affinity-grid"><div class="affinity-card"><h3>Docentes mais semelhantes</h3>${simplePairTableDoc(rows)}</div><div class="affinity-card"><h3>Docentes mais diferentes</h3>${simplePairTableDoc(opposite)}</div></div>`;
+}
+
+function renderPairsUC(){
+  const method = document.getElementById("puc-method").value;
+  const limit = Number(document.getElementById("puc-limit").value);
+  const thresh = Number(document.getElementById("puc-thresh").value)/100;
+  document.getElementById("puc-thresh-val").textContent = thresh.toFixed(2);
+  const ucIdx = filteredUCsForPairing(), docIdx = filteredDocentesForPairing();
+  const rows = [];
+  for(let a=0;a<ucIdx.length;a++) for(let b=a+1;b<ucIdx.length;b++){
+    const i = ucIdx[a], j = ucIdx[b];
+    const score = similarity(ucVector(i, docIdx), ucVector(j, docIdx), method);
+    if(score >= thresh) rows.push({i,j,score});
+  }
+  rows.sort((a,b)=>b.score-a.score);
+  document.getElementById("pares-uc-container").innerHTML = `<p class="mini-note" style="margin-bottom:10px">${rows.length} pares encontrados com ${methodLabel(method)} ≥ ${thresh.toFixed(2)}.</p>${pairsUCTable(rows.slice(0,limit))}`;
+}
+function pairsUCTable(rows){
+  if(!rows.length) return `<div class="empty-state">Sem pares para o threshold selecionado.</div>`;
+  return `<div class="table-wrap"><table class="pair-table"><thead><tr><th>#</th><th>UC A</th><th>UC B</th><th class="number">Afinidade</th></tr></thead><tbody>${rows.map((r,k)=>{const a=ucMeta(r.i), b=ucMeta(r.j);return `<tr><td>${k+1}</td><td><div class="uc-name">${esc(a.nome)}</div><div class="meta">${esc(a.id)} · ${esc(a.curso)} · ${esc(a.area)}</div></td><td><div class="uc-name">${esc(b.nome)}</div><div class="meta">${esc(b.id)} · ${esc(b.curso)} · ${esc(b.area)}</div></td><td class="number"><span class="corr-pill" style="background:${colorCorr(r.score)}">${r.score.toFixed(3)}</span></td></tr>`}).join("")}</tbody></table></div>`;
+}
+function renderPairsDoc(){
+  const method = document.getElementById("pdoc-method").value;
+  const limit = Number(document.getElementById("pdoc-limit").value);
+  const thresh = Number(document.getElementById("pdoc-thresh").value)/100;
+  document.getElementById("pdoc-thresh-val").textContent = thresh.toFixed(2);
+  const docIdx = filteredDocentes(), ucIdx = filteredUCs();
+  const rows = [];
+  for(let a=0;a<docIdx.length;a++) for(let b=a+1;b<docIdx.length;b++){
+    const i = docIdx[a], j = docIdx[b];
+    const score = similarity(docVector(i, ucIdx), docVector(j, ucIdx), method);
+    if(score >= thresh) rows.push({i,j,score});
+  }
+  rows.sort((a,b)=>b.score-a.score);
+  document.getElementById("pares-doc-container").innerHTML = `<p class="mini-note" style="margin-bottom:10px">${rows.length} pares encontrados com ${methodLabel(method)} ≥ ${thresh.toFixed(2)}.</p>${pairsDocTable(rows.slice(0,limit))}`;
+}
+function pairsDocTable(rows){
+  if(!rows.length) return `<div class="empty-state">Sem pares para o threshold selecionado.</div>`;
+  return `<div class="table-wrap"><table class="pair-table"><thead><tr><th>#</th><th>Docente A</th><th>Docente B</th><th class="number">Afinidade</th></tr></thead><tbody>${rows.map((r,k)=>`<tr><td>${k+1}</td><td>${esc(DATA.docentes[r.i])}<div class="meta">${esc(docGroupLabel(DATA.docente_groups[r.i]))}</div></td><td>${esc(DATA.docentes[r.j])}<div class="meta">${esc(docGroupLabel(DATA.docente_groups[r.j]))}</div></td><td class="number"><span class="corr-pill" style="background:${colorCorr(r.score)}">${r.score.toFixed(3)}</span></td></tr>`).join("")}</tbody></table></div>`;
+}
+
+function renderNetwork(){
+  const canvas = document.getElementById("network-canvas"), ctx = canvas.getContext("2d");
+  const ratio = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = Math.max(600, rect.width) * ratio;
+  canvas.height = Math.max(420, rect.height) * ratio;
+  ctx.setTransform(ratio,0,0,ratio,0,0);
+  const W = canvas.width / ratio, H = canvas.height / ratio;
+  const type = document.getElementById("net-type").value;
+  const method = document.getElementById("net-method").value;
+  const limit = Number(document.getElementById("net-limit").value);
+  const thresh = Number(document.getElementById("net-thresh").value)/100;
+  const spacing = Number(document.getElementById("net-spacing").value);
+  const labelMode = document.getElementById("net-label-mode").value;
+  document.getElementById("net-thresh-val").textContent = thresh.toFixed(2);
+  document.getElementById("net-spacing-val").textContent = String(spacing);
+  if(networkAnimation) cancelAnimationFrame(networkAnimation);
+
+  let indices, labels, colors, vectors, keys, detail;
+  if(type === "doc"){
+    indices = filteredDocentes().slice(0,limit);
+    labels = indices.map(j => DATA.docentes[j]);
+    colors = indices.map(j => DATA.docente_groups[j] === "integral" ? "#6ee7b7" : DATA.docente_groups[j] === "outros" ? "#f472b6" : "#64748b");
+    vectors = indices.map(j => docVector(j, filteredUCs()));
+    keys = indices.map((j,k) => String(k+1));
+    detail = indices.map(j => docGroupLabel(DATA.docente_groups[j]));
+  }else{
+    indices = filteredUCs().map(i => metricsForUC(i, filteredDocentes())).sort((a,b)=>b.pref-a.pref || b.avg-a.avg).slice(0,limit).map(r=>r.i);
+    labels = indices.map(i => DATA.ucs[i]);
+    colors = indices.map(i => AREA_COLORS[ucMeta(i).area] || "#64748b");
+    vectors = indices.map(i => ucVector(i, filteredDocentes()));
+    keys = indices.map(i => DATA.uc_ids[i]);
+    detail = indices.map(i => `${ucMeta(i).curso} · ${ucMeta(i).area} · Sem ${ucMeta(i).sem}`);
+  }
+  const n = labels.length;
+  if(!n){
+    ctx.clearRect(0,0,W,H);
+    document.getElementById("node-list").innerHTML = `<div class="empty-state">Sem dados para a rede.</div>`;
+    return;
+  }
+  const edges = [];
+  for(let i=0;i<n;i++) for(let j=i+1;j<n;j++){
+    const s = similarity(vectors[i], vectors[j], method);
+    if(s >= thresh) edges.push({i,j,s});
+  }
+  const nodes = labels.map((label,i) => {
+    const t = i / Math.max(1,n-1);
+    const angle = i * 2.399963229728653;
+    const radius = Math.sqrt(t) * Math.min(W,H) * 0.36;
+    return {i, label, key:keys[i], detail:detail[i], color:colors[i], x:W/2 + Math.cos(angle)*radius + (Math.random()-.5)*22, y:H/2 + Math.sin(angle)*radius + (Math.random()-.5)*22, vx:0, vy:0, degree:0};
+  });
+  edges.forEach(e => {nodes[e.i].degree++; nodes[e.j].degree++;});
+
+  let iter = 0;
+  function step(){
+    iter++;
+    const repulsion = spacing * 75;
+    const minDist = spacing * .56;
+    for(let i=0;i<n;i++) for(let j=i+1;j<n;j++){
+      const A=nodes[i], B=nodes[j];
+      let dx=B.x-A.x, dy=B.y-A.y;
+      let dist=Math.sqrt(dx*dx+dy*dy) || .01;
+      const f = repulsion/(dist*dist);
+      const fx = f*dx/dist, fy = f*dy/dist;
+      A.vx -= fx; A.vy -= fy; B.vx += fx; B.vy += fy;
+      if(dist < minDist){
+        const push = (minDist-dist)*0.05;
+        A.vx -= push*dx/dist; A.vy -= push*dy/dist; B.vx += push*dx/dist; B.vy += push*dy/dist;
+      }
+    }
+    edges.forEach(e => {
+      const A=nodes[e.i], B=nodes[e.j];
+      const dx=B.x-A.x, dy=B.y-A.y;
+      const dist=Math.sqrt(dx*dx+dy*dy) || .01;
+      const target = spacing * (1.35 - Math.min(.8,e.s));
+      const f = (dist-target) * .004 * (0.5 + e.s);
+      A.vx += f*dx/dist; A.vy += f*dy/dist; B.vx -= f*dx/dist; B.vy -= f*dy/dist;
+    });
+    nodes.forEach(node => {
+      node.vx += (W/2-node.x)*.0025;
+      node.vy += (H/2-node.y)*.0025;
+      const margin = 50;
+      if(node.x < margin) node.vx += (margin-node.x)*.02;
+      if(node.x > W-margin) node.vx -= (node.x-(W-margin))*.02;
+      if(node.y < margin) node.vy += (margin-node.y)*.02;
+      if(node.y > H-margin) node.vy -= (node.y-(H-margin))*.02;
+      node.x += node.vx; node.y += node.vy;
+      node.vx *= .82; node.vy *= .82;
+    });
+    draw();
+    if(iter < 420) networkAnimation = requestAnimationFrame(step);
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    edges.forEach(e => {
+      const A=nodes[e.i], B=nodes[e.j];
+      ctx.beginPath(); ctx.moveTo(A.x,A.y); ctx.lineTo(B.x,B.y);
+      ctx.strokeStyle = `rgba(219,234,254,${Math.min(.65,.12 + e.s*.45)})`;
+      ctx.lineWidth = 0.6 + e.s*2.4;
+      ctx.stroke();
+    });
+    nodes.forEach(node => {
+      const r = type === "doc" ? 7 + Math.min(5,node.degree) : 6 + Math.min(5,node.degree*.7);
+      ctx.beginPath(); ctx.arc(node.x,node.y,r,0,Math.PI*2); ctx.fillStyle=node.color; ctx.fill();
+      ctx.strokeStyle="#090b0f"; ctx.lineWidth=1.6; ctx.stroke();
+      if(labelMode !== "none"){
+        ctx.fillStyle="#e5eefb"; ctx.font="11px Inter, system-ui"; ctx.textAlign="center";
+        const label = labelMode === "key" ? node.key : ucShort(type === "doc" ? shortName(node.label) : node.label, 24);
+        ctx.fillText(label, node.x, node.y - r - 7);
+      }
+    });
+  }
+  canvas.onmousemove = e => {
+    const r = canvas.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    const hit = nodes.find(node => (node.x-x)**2 + (node.y-y)**2 < 220);
+    if(hit) tip(e, `<span class=tip-title>${esc(hit.label)}</span><span class=soft>${esc(hit.key)} · ${esc(hit.detail)}<br>Ligações: ${hit.degree}</span>`);
+    else hideTip();
+  };
+  canvas.onmouseleave = hideTip;
+  document.getElementById("node-list").innerHTML = `<h3>${type === "doc" ? "Docentes" : "UCs"} na rede · ${methodLabel(method)}</h3>` + nodes.sort((a,b)=>b.degree-a.degree).map(n => `<div class="node-item"><span class="node-key">${esc(n.key)}</span><span>${esc(n.label)}<div class="meta">${esc(n.detail)} · ${n.degree} ligações</div></span></div>`).join("");
+  const legendItems = type === "doc" ? [["#6ee7b7","Tempo integral"],["#f472b6","Outros docentes"],["#64748b","Sem grupo"]] : [...new Set(indices.map(i=>ucMeta(i).area))].map(a => [AREA_COLORS[a] || "#64748b", a]);
+  document.getElementById("net-legend").innerHTML = legendItems.map(([c,t]) => `<span><i class="dot" style="background:${c}"></i>${esc(t)}</span>`).join("");
+  step();
+}
+
+function tip(e, html){
+  const t = document.getElementById("tooltip");
+  t.innerHTML = html;
+  t.style.display = "block";
+  const x = Math.min(e.clientX + 14, window.innerWidth - 410);
+  const y = Math.min(e.clientY + 14, window.innerHeight - 160);
+  t.style.left = `${x}px`;
+  t.style.top = `${y}px`;
+}
+function hideTip(){document.getElementById("tooltip").style.display="none";}
+
+function renderCurrent(){
+  if(!DATA) return;
+  renderMetrics();
+  populateFocusSelects();
+  if(ACTIVE_TAB === "heatmap") renderHeatmap();
+  if(ACTIVE_TAB === "ranking-ucs") renderUCRanking();
+  if(ACTIVE_TAB === "doc-ranking") renderDocRanking();
+  if(ACTIVE_TAB === "uc-corr") renderUCAffinity();
+  if(ACTIVE_TAB === "doc-corr") renderDocAffinity();
+  if(ACTIVE_TAB === "network") renderNetwork();
+  if(ACTIVE_TAB === "pares-uc") renderPairsUC();
+  if(ACTIVE_TAB === "pares-doc") renderPairsDoc();
+}
+function renderAll(){
+  if(!DATA) return;
+  renderMetrics();
+  renderHeatmap();
+}
+function clearFilters(){
+  ["filter-sem","filter-ciclo","filter-curso","filter-area","filter-docentes","search-uc"].forEach(id => {document.getElementById(id).value = "";});
+  renderCurrent();
+}
+function bindEvents(){
+  ["filter-sem","filter-ciclo","filter-curso","filter-area","filter-docentes","search-uc"].forEach(id => document.getElementById(id).addEventListener("input", renderCurrent));
+  document.getElementById("clear-filters").addEventListener("click", clearFilters);
+  ["heat-min","uc-rank-sort","uc-rank-dir","doc-top-n","uc-focus","uc-aff-method","uc-affinity-topn","doc-focus","doc-aff-method","doc-affinity-topn","net-type","net-method","net-limit","net-thresh","net-spacing","net-label-mode","puc-method","puc-limit","puc-thresh","pdoc-method","pdoc-limit","pdoc-thresh"].forEach(id => document.getElementById(id).addEventListener("input", renderCurrent));
+  document.querySelectorAll(".tab").forEach(btn => btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab,.panel").forEach(x => x.classList.remove("active"));
+    btn.classList.add("active");
+    ACTIVE_TAB = btn.dataset.tab;
+    document.getElementById(ACTIVE_TAB).classList.add("active");
+    renderCurrent();
+  }));
+  window.addEventListener("resize", () => { if(DATA && ACTIVE_TAB === "network") renderNetwork(); });
+}
+
+bindEvents();
+loadExcelFromUrl(DATA_FILE);
+</script>
+</body>
+</html>
